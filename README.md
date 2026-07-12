@@ -136,7 +136,7 @@ git push -u origin main
 |----------|-------|
 | `DATABASE_URL` | Neon pooled connection string |
 | `AUTH_SECRET` | `openssl rand -base64 32` |
-| `AUTH_URL` | Your production URL (`https://….vercel.app` or custom domain) |
+| `AUTH_URL` | Production site URL — **`https://cat4.thcmoc.com`** (must match the custom domain; a stale `*.vercel.app` value breaks login redirects) |
 | `USE_MOCK_DATA` | `false` |
 | `BLOB_READ_WRITE_TOKEN` | From Vercel Blob store (step 4) |
 | `SEED_ADMIN_EMAIL` | Optional — only needed for seeding |
@@ -158,7 +158,18 @@ DATABASE_URL="your-neon-pooled-url" npm run db:push
 DATABASE_URL="your-neon-pooled-url" SEED_ADMIN_EMAIL="you@example.com" SEED_ADMIN_PASSWORD="strong-password" npm run db:seed
 ```
 
-Then log in at `https://your-domain/admin` with those credentials. Change the password after first login if you used a temporary one.
+Then log in at [https://cat4.thcmoc.com/admin](https://cat4.thcmoc.com/admin) with those credentials. Change the password after first login if you used a temporary one.
+
+### Custom domain + login troubleshooting
+
+If the login page loads but sign-in fails or redirects to an old `*.vercel.app` host:
+
+1. Vercel → Project → **Settings → Domains** — confirm `cat4.thcmoc.com` is attached and valid.
+2. Vercel → **Settings → Environment Variables** — set Production `AUTH_URL` to `https://cat4.thcmoc.com` (or delete `AUTH_URL` so Auth.js auto-detects via `trustHost`).
+3. **Redeploy** after changing env vars.
+4. Clear site cookies for both the custom domain and any old `*.vercel.app` host, then retry `/admin/login`.
+
+Keep `brand.url` in `src/lib/brand.ts` aligned with that same canonical URL.
 
 ### Neon + Vercel integration (optional)
 

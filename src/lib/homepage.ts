@@ -79,9 +79,9 @@ export const HOMEPAGE_ICON_OPTIONS = [
 
 export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   seo: {
-    title: "CAT4 — Premium Cannabis House Brand",
+    title: "CAT4 — 100% Clean Cannabis",
     description:
-      "CAT4 is a premium cannabis house brand with transparent quality, full-format variety, and value across flower, pre-rolls, vapes, and concentrates.",
+      "CAT4 is 100% clean cannabis with transparent quality, full-format variety, and value across flower, pre-rolls, vapes, and concentrates.",
   },
   hero: {
     badge: "The CAT4 Standard",

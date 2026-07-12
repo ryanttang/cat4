@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(brand.url),
   title: {
     default: `${brand.name} — ${brand.tagline}`,
     template: `%s | ${brand.name}`,

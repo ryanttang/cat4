@@ -12,9 +12,11 @@ export const brand = {
   name: "CAT4",
   /** Optional longer legal / entity name (consent, footer). Defaults to `name`. */
   legalName: "CAT4",
-  tagline: "Premium Cannabis Products",
+  /** Canonical public site URL (no trailing slash). Keep in sync with Vercel AUTH_URL. */
+  url: "https://cat4.thcmoc.com",
+  tagline: "100% Clean Cannabis",
   description:
-    "Premium cannabis products crafted with precision and passion.",
+    "100% clean cannabis with transparent quality, full-format variety, and value that keeps you coming back.",
   /** Minimum age for the public age gate. */
   ageGateMinYears: 21,
   colors: {
