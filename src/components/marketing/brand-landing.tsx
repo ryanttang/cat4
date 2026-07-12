@@ -9,6 +9,7 @@ import {
   BadgeCheck,
   FlaskConical,
   Layers,
+  Package,
   ShieldCheck,
   Sparkles,
   Tag,
@@ -64,10 +65,20 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
       .slice(0, 2),
   ];
 
-  const stats = content.stats.map((stat) => ({
-    value: stat.useProductCount ? `${productCount}+` : stat.value,
-    label: stat.label,
-  }));
+  const stats = content.stats.map((stat) => {
+    const labelLower = stat.label.toLowerCase();
+    const Icon =
+      stat.useProductCount || labelLower.includes("product")
+        ? Package
+        : labelLower.includes("lab")
+          ? FlaskConical
+          : BadgeCheck;
+    return {
+      value: stat.useProductCount ? `${productCount}+` : stat.value,
+      label: stat.label,
+      Icon,
+    };
+  });
 
   return (
     <div className={cn("bg-cat4-primary", preview && "pointer-events-none")}>
@@ -107,7 +118,7 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
               {content.hero.headline}
               <span className="mt-1 block text-cat4-blue sm:mt-2">{content.hero.headlineAccent}</span>
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-cat4-light/85 sm:mt-6 sm:text-lg lg:text-xl">{content.hero.body}</p>
+            <p className="mt-3 max-w-3xl text-sm leading-snug text-cat4-light/85 sm:mt-5 sm:text-base lg:text-lg">{content.hero.body}</p>
             <div className="mt-5 flex flex-wrap justify-center gap-3 sm:mt-10 sm:gap-4">
               <Button asChild size="lg" className="px-6 sm:px-8">
                 <Link href={content.hero.primaryCta.href}>
@@ -124,51 +135,66 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
                 <Link href={content.hero.secondaryCta.href}>{content.hero.secondaryCta.label}</Link>
               </Button>
             </div>
+            {stats.length > 0 && (
+              <ul className="mt-5 flex flex-wrap justify-center gap-2.5 sm:mt-7 sm:gap-3">
+                {stats.map((stat) => (
+                  <li
+                    key={stat.label}
+                    className="inline-flex items-center gap-2 rounded-md border border-cat4-blue/35 bg-cat4-blue/15 px-3 py-1.5 shadow-[inset_0_1px_0_0_rgba(253,253,253,0.06)] backdrop-blur-sm sm:gap-2.5 sm:px-3.5 sm:py-2"
+                  >
+                    <stat.Icon
+                      className="h-3.5 w-3.5 shrink-0 text-cat4-blue sm:h-4 sm:w-4"
+                      aria-hidden
+                    />
+                    <span className="flex items-baseline gap-1.5 text-left leading-none">
+                      {stat.value ? (
+                        <span className="text-sm font-bold tracking-tight text-cat4-blue sm:text-base">
+                          {stat.value}
+                        </span>
+                      ) : null}
+                      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-cat4-light/75 sm:text-xs">
+                        {stat.label}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
+          {!preview && (
+            <button
+              type="button"
+              onClick={() =>
+                document.getElementById("home-content")?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="absolute bottom-3 left-6 z-20 hidden items-center gap-2 text-cat4-light/50 transition-colors hover:text-cat4-light lg:flex"
+              aria-label="Scroll down"
+            >
+              <ChevronDown className="h-5 w-5 animate-bounce" />
+            </button>
+          )}
         </section>
 
-        <section className={cn("shrink-0 border-b border-border bg-cat4-surface", preview && "py-2")}>
-          <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-border">
-            {stats.map((stat) => (
-              <div key={stat.label} className={cn("px-4 text-center sm:px-6", preview ? "py-4" : "py-4 sm:py-6 lg:py-8")}>
-                <p className={cn("font-bold text-cat4-blue", preview ? "text-xl" : "text-2xl sm:text-3xl lg:text-4xl")}>{stat.value}</p>
-                <p className="mt-0.5 text-xs text-cat4-light/60 sm:mt-1 sm:text-sm">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {!preview && (
-          <button
-            type="button"
-            onClick={() =>
-              document.getElementById("home-content")?.scrollIntoView({ behavior: "smooth" })
-            }
-            className="absolute bottom-6 left-8 z-20 hidden items-center gap-2 text-cat4-light/50 transition-colors hover:text-cat4-light lg:flex"
-            aria-label="Scroll down"
-          >
-            <ChevronDown className="h-5 w-5 animate-bounce" />
-          </button>
-        )}
-      </div>
-
-      {!preview && <div aria-hidden className="h-[62vh] sm:h-[72vh] lg:h-[calc(100vh-4rem)]" />}
-
-      <div id="home-content" className={cn("bg-cat4-primary", !preview && "relative z-10")}>
-        <section className="bg-cat4-dark px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
+        <section
+          className={cn(
+            "shrink-0 border-t border-border/60 bg-cat4-surface",
+            preview ? "px-3 py-3" : "px-3 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5"
+          )}
+        >
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
               <SectionLabel>{content.lineup.sectionLabel}</SectionLabel>
             </div>
 
-            <div className="mt-5 grid grid-cols-5 gap-1.5 sm:mt-6 md:gap-4 lg:gap-5">
+            <div className="mt-2.5 grid grid-cols-5 gap-1 sm:mt-3 sm:gap-2.5 md:gap-3 lg:gap-4">
               {CATALOG_CATEGORIES.map((cat) => {
                 const image = categoryImages[cat.slug];
                 return (
                   <Link
                     key={cat.slug}
                     href={`/products/${cat.slug}`}
-                    className="group overflow-hidden rounded-lg border border-border/40 bg-cat4-surface/30 transition-all hover:border-cat4-blue/50 hover:bg-cat4-surface/50 md:rounded-2xl"
+                    className="group overflow-hidden rounded-md border border-border/40 bg-cat4-dark/40 transition-all hover:border-cat4-blue/50 hover:bg-cat4-dark/60 md:rounded-xl"
                   >
                     <div className="relative aspect-square">
                       {image && (
@@ -176,12 +202,12 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
                           src={image}
                           alt={cat.label}
                           fill
-                          className="object-contain p-1.5 transition-transform duration-300 group-hover:scale-105 md:p-5 lg:p-6"
+                          className="object-contain p-1 transition-transform duration-300 group-hover:scale-105 sm:p-2 md:p-3 lg:p-4"
                           sizes="(max-width: 640px) 20vw, 20vw"
                         />
                       )}
-                      <div className="absolute inset-0 flex items-center justify-center p-1.5 md:p-4">
-                        <span className="rounded-full border border-white/15 bg-cat4-dark/85 px-2 py-0.5 text-center text-[10px] font-semibold text-cat4-light shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:border-cat4-blue/60 group-hover:bg-cat4-blue group-hover:text-white md:px-4 md:py-1.5 md:text-base md:group-hover:scale-110 lg:px-5 lg:py-2 lg:text-lg">
+                      <div className="absolute inset-0 flex items-center justify-center p-1 md:p-3">
+                        <span className="rounded-full border border-white/15 bg-cat4-dark/85 px-1.5 py-0.5 text-center text-[9px] font-semibold text-cat4-light shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:border-cat4-blue/60 group-hover:bg-cat4-blue group-hover:text-white sm:px-2 sm:text-[10px] md:px-3.5 md:py-1 md:text-sm lg:px-4 lg:py-1.5 lg:text-base">
                           {cat.label}
                         </span>
                       </div>
@@ -192,7 +218,11 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
             </div>
           </div>
         </section>
+      </div>
 
+      {!preview && <div aria-hidden className="h-[62vh] sm:h-[72vh] lg:h-[calc(100vh-4rem)]" />}
+
+      <div id="home-content" className={cn("bg-cat4-primary", !preview && "relative z-10")}>
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-2xl font-bold text-cat4-light">{content.fanFavorites.title}</h2>

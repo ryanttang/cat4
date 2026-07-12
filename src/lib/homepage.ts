@@ -87,7 +87,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     badge: "The CAT4 Standard",
     headline: "Cannabis done right.",
     headlineAccent: "For everyone.",
-    body: "CAT4 is a premium house brand redefining what consumers should expect from cannabis — transparent quality, full-format variety, and value that keeps you coming back.",
+    body: "CAT4 is redefining what consumers should expect from cannabis with transparent quality, full-format variety, and value that keeps you coming back.",
     primaryCta: { label: "Shop the lineup", href: "/products" },
     secondaryCta: { label: "Find near you", href: "/find" },
   },
