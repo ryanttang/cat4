@@ -8,7 +8,9 @@ import {
   ChevronRight,
   BadgeCheck,
   FlaskConical,
+  LayoutGrid,
   Layers,
+  MapPin,
   Package,
   ShieldCheck,
   Sparkles,
@@ -122,8 +124,8 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
             <div className="mt-5 flex flex-wrap justify-center gap-3 sm:mt-10 sm:gap-4">
               <Button asChild size="lg" className="px-6 sm:px-8">
                 <Link href={content.hero.primaryCta.href}>
+                  <LayoutGrid className="mr-2 h-4 w-4" aria-hidden />
                   {content.hero.primaryCta.label}
-                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button
@@ -132,7 +134,10 @@ export function BrandLanding({ products, featuredProducts, content, preview = fa
                 variant="outline"
                 className="border-cat4-light/30 bg-transparent text-cat4-light hover:bg-cat4-light/10"
               >
-                <Link href={content.hero.secondaryCta.href}>{content.hero.secondaryCta.label}</Link>
+                <Link href={content.hero.secondaryCta.href}>
+                  <MapPin className="mr-2 h-4 w-4" aria-hidden />
+                  {content.hero.secondaryCta.label}
+                </Link>
               </Button>
             </div>
             {stats.length > 0 && (

@@ -88,8 +88,8 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     headline: "Cannabis done right.",
     headlineAccent: "For everyone.",
     body: "CAT4 is redefining what consumers should expect from cannabis with transparent quality, full-format variety, and value that keeps you coming back.",
-    primaryCta: { label: "Shop the lineup", href: "/products" },
-    secondaryCta: { label: "Find near you", href: "/find" },
+    primaryCta: { label: "View the Lineup", href: "/products" },
+    secondaryCta: { label: "Find Near You", href: "/find" },
   },
   stats: [
     { value: "", label: "Products", useProductCount: true },
