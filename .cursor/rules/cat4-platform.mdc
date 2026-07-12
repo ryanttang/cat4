@@ -1,0 +1,35 @@
+---
+description: CAT4 platform architecture, white-label, and modularity — always apply
+alwaysApply: true
+---
+
+# CAT4 agent guidance
+
+This repo is a **reusable single-brand platform** (reference skin: CAT4). Scale to other brands by **cloning + rebranding**, not multi-tenant tables.
+
+Before building or refactoring, read:
+
+**`.cursor/skills/cat4-platform/SKILL.md`**
+
+Then open only what you need:
+
+- `architecture.md` — data flow, mock/DB, auth, actions vs API
+- `modularity.md` — boundaries and scale rules
+- `conventions.md` — naming, checklists, anti-patterns
+- `domain-map.md` — domain → routes → modules
+- `white-label.md` — platform vs skin, clone playbook
+- `extending.md` — worked examples
+
+## Hard rules
+
+1. **Brand SSOT:** `src/lib/brand.ts` — no new hardcoded `"CAT4"` chrome/consent/metadata
+2. **Schema SSOT:** `src/lib/db/schema.ts` (brand-agnostic table names)
+3. **No Drizzle in pages/components** — go through `src/lib/data/*`
+4. **Dual path required:** every data function supports mock + DB via `isMockDataMode()`
+5. **Writes:** Server Actions + Zod + `revalidatePath`
+6. **No new global client state** — RSC + actions + local state
+7. **Polls share `surveys`** — do not add a polls table
+8. **Homepage JSON ≠ hero_blocks**
+9. **White-label:** clone + `brand.ts` + theme + seeds; do not add `brandId` tenancy for a rebrand
+
+If README conflicts with schema/code, trust schema/code and update docs when asked.

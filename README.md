@@ -213,4 +213,3 @@ Architecture, modularity, and agent conventions live in [`AGENTS.md`](AGENTS.md)
 - SMS capture (TCPA)
 - Public live poll results
 - ESP integration (Resend/SendGrid sync)
-# cat4

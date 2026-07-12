@@ -1,0 +1,401 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { FileUpload } from "@/components/admin/file-upload";
+import { PromotionPagePreview } from "@/components/admin/promotion-page-preview";
+import { createLandingPage, updateLandingPage, deleteLandingPage } from "@/lib/actions/admin";
+import { LANDING_PAGE_TYPES, slugify } from "@/lib/utils";
+import { sweepstakesTemplateBlocks } from "@/lib/mock/sweepstakes-seed";
+import { DEFAULT_HERO_YOUTUBE_URL } from "@/lib/hero-video";
+import type { LandingPage, LandingPageBlock } from "@/lib/db/schema";
+import { ChevronLeft, Sparkles, Trash2 } from "lucide-react";
+import { adminPanelClass } from "@/components/admin/admin-ui";
+import type { AdminDialogFormProps } from "@/components/admin/admin-form-dialog";
+
+export function LandingPageForm({
+  page,
+  dialog,
+  onSuccess,
+}: AdminDialogFormProps & { page?: LandingPage }) {
+  const router = useRouter();
+  const blocks = (page?.blocks ?? {}) as LandingPageBlock;
+
+  const [title, setTitle] = useState(page?.title ?? "");
+  const [slug, setSlug] = useState(page?.slug ?? "");
+  const [type, setType] = useState(page?.type ?? "giveaway");
+  const [status, setStatus] = useState(page?.status ?? "draft");
+  const [headline, setHeadline] = useState(blocks.hero?.headline ?? "");
+  const [subheadline, setSubheadline] = useState(blocks.hero?.subheadline ?? "");
+  const [videoUrl, setVideoUrl] = useState(blocks.hero?.videoUrl ?? "");
+  const [previewVideoAutoplay, setPreviewVideoAutoplay] = useState(false);
+  const [imageUrl, setImageUrl] = useState(blocks.hero?.imageUrl ?? "");
+  const [prizeTitle, setPrizeTitle] = useState(blocks.prize?.title ?? "");
+  const [prizeDesc, setPrizeDesc] = useState(blocks.prize?.description ?? "");
+  const [rules, setRules] = useState(blocks.rules?.content ?? "");
+  const [consentText, setConsentText] = useState(
+    blocks.form?.consentText ?? "I agree to the official rules and to receive emails from CAT4."
+  );
+  const [startsAt, setStartsAt] = useState(page?.startsAt ? new Date(page.startsAt).toISOString().slice(0, 16) : "");
+  const [endsAt, setEndsAt] = useState(page?.endsAt ? new Date(page.endsAt).toISOString().slice(0, 16) : "");
+  const [passwordProtected, setPasswordProtected] = useState(blocks.settings?.passwordProtected ?? false);
+  const [accessPassword, setAccessPassword] = useState(blocks.settings?.accessPassword ?? "");
+  const [countdownEnabled, setCountdownEnabled] = useState(blocks.settings?.countdownEnabled ?? true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  function buildBlocks(): LandingPageBlock {
+    return {
+      settings: {
+        passwordProtected,
+        accessPassword: passwordProtected ? accessPassword : undefined,
+        countdownEnabled,
+      },
+      hero: {
+        headline: headline || title,
+        subheadline,
+        videoUrl: videoUrl || undefined,
+        imageUrl: imageUrl || undefined,
+      },
+      form: {
+        fields: [
+          { name: "email", label: "Email", required: true, type: "email" },
+          { name: "firstName", label: "First Name", required: false, type: "text" },
+          { name: "lastName", label: "Last Name", required: false, type: "text" },
+        ],
+        consentText,
+      },
+      rules: { content: rules },
+      prize: prizeTitle ? { title: prizeTitle, description: prizeDesc } : undefined,
+    };
+  }
+
+  const previewDraft = useMemo(
+    () => ({
+      title,
+      slug: slug || slugify(title) || "preview",
+      type,
+      status,
+      blocks: buildBlocks(),
+      startsAt,
+      endsAt,
+    }),
+    [
+      title,
+      slug,
+      type,
+      status,
+      headline,
+      subheadline,
+      videoUrl,
+      imageUrl,
+      prizeTitle,
+      prizeDesc,
+      rules,
+      consentText,
+      passwordProtected,
+      accessPassword,
+      countdownEnabled,
+      startsAt,
+      endsAt,
+    ]
+  );
+
+  function loadSweepstakesTemplate() {
+    const template = sweepstakesTemplateBlocks(title || "CAT4 Sweepstakes");
+    setType("sweepstakes");
+    setHeadline(template.hero?.headline ?? "");
+    setSubheadline(template.hero?.subheadline ?? "");
+    setVideoUrl(template.hero?.videoUrl ?? DEFAULT_HERO_YOUTUBE_URL);
+    setPrizeTitle(template.prize?.title ?? "");
+    setPrizeDesc(template.prize?.description ?? "");
+    setRules(template.rules?.content ?? "");
+    setConsentText(template.form?.consentText ?? consentText);
+    if (!startsAt) {
+      setStartsAt(new Date().toISOString().slice(0, 16));
+    }
+    if (!endsAt) {
+      const end = new Date();
+      end.setMonth(end.getMonth() + 3);
+      setEndsAt(end.toISOString().slice(0, 16));
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    const data = {
+      title,
+      slug: slug || slugify(title),
+      type,
+      status,
+      blocks: buildBlocks(),
+      startsAt: startsAt || null,
+      endsAt: endsAt || null,
+    };
+
+    const result = page ? await updateLandingPage(page.id, data) : await createLandingPage(data);
+    if (result.success) {
+      if (onSuccess) onSuccess();
+      else {
+        router.push("/admin/landing-pages");
+        router.refresh();
+      }
+    } else {
+      setError(result.error ?? "Failed");
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!page) return;
+    if (!confirm(`Delete "${page.title}"? This cannot be undone.`)) return;
+    setLoading(true);
+    const result = await deleteLandingPage(page.id);
+    if (result.success) {
+      if (onSuccess) onSuccess();
+      else {
+        router.push("/admin/landing-pages");
+        router.refresh();
+      }
+    } else {
+      setError(result.error ?? "Failed to delete");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className={dialog ? "space-y-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6" : "xl:grid xl:grid-cols-2 xl:items-start xl:gap-8"}>
+      <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
+      {!dialog && (
+        <Button asChild variant="ghost" className="-ml-2">
+          <Link href="/admin/landing-pages">
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Back
+          </Link>
+        </Button>
+      )}
+
+      {!page && (
+        <Button type="button" variant="outline" onClick={loadSweepstakesTemplate}>
+          <Sparkles className="mr-2 h-4 w-4" />
+          Load sweepstakes template
+        </Button>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label>Title</Label>
+          <Input
+            required
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (!page) setSlug(slugify(e.target.value));
+            }}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Slug</Label>
+          <Input required value={slug} onChange={(e) => setSlug(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label>Type</Label>
+          <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LANDING_PAGE_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Status</Label>
+          <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <h3 className="font-semibold">Hero Block</h3>
+        <div>
+          <Label>Headline</Label>
+          <Input value={headline} onChange={(e) => setHeadline(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label>Subheadline</Label>
+          <Input value={subheadline} onChange={(e) => setSubheadline(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1">
+              <Label>YouTube or Video URL</Label>
+              <Input
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder={DEFAULT_HERO_YOUTUBE_URL}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex shrink-0 items-center gap-2 sm:pb-0.5">
+              <Switch
+                checked={previewVideoAutoplay}
+                onCheckedChange={setPreviewVideoAutoplay}
+                id="preview-video-autoplay"
+              />
+              <Label htmlFor="preview-video-autoplay" className="text-sm font-normal">
+                Play in preview
+              </Label>
+            </div>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Paste a YouTube link or direct video URL. Upload below if you prefer a hosted file.
+          </p>
+        </div>
+        <FileUpload label="Hero Video (upload)" accept="video/*" value={videoUrl} onChange={setVideoUrl} />
+        <FileUpload label="Hero Image" accept="image/*" value={imageUrl} onChange={setImageUrl} />
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <h3 className="font-semibold">Prize Block (optional)</h3>
+        <div>
+          <Label>Prize Title</Label>
+          <Input value={prizeTitle} onChange={(e) => setPrizeTitle(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label>Prize Description</Label>
+          <Textarea value={prizeDesc} onChange={(e) => setPrizeDesc(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <h3 className="font-semibold">Form Block</h3>
+        <div>
+          <Label>Consent Text</Label>
+          <Textarea value={consentText} onChange={(e) => setConsentText(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <h3 className="font-semibold">Rules Block</h3>
+        <div>
+          <Label>Official Rules</Label>
+          <Textarea rows={8} value={rules} onChange={(e) => setRules(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <h3 className="font-semibold">Promotion Settings</h3>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label>Password Protected</Label>
+            <p className="text-xs text-muted-foreground">
+              Require a password before visitors can view this promotion.
+            </p>
+          </div>
+          <Switch checked={passwordProtected} onCheckedChange={setPasswordProtected} />
+        </div>
+        {passwordProtected && (
+          <div>
+            <Label>Access Password</Label>
+            <Input
+              type="password"
+              value={accessPassword}
+              onChange={(event) => setAccessPassword(event.target.value)}
+              placeholder="Enter promotion password"
+              className="mt-1"
+              required={passwordProtected}
+            />
+          </div>
+        )}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <Label>Countdown Timer</Label>
+            <p className="text-xs text-muted-foreground">
+              Show a countdown to the promotion end date on the landing page.
+            </p>
+          </div>
+          <Switch checked={countdownEnabled} onCheckedChange={setCountdownEnabled} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label>Starts At</Label>
+          <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label>Ends At</Label>
+          <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="mt-1" />
+        </div>
+      </div>
+
+      {page && (
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <span className="text-muted-foreground">
+            Landing:{" "}
+            <Link href={`/l/${page.slug}`} className="text-cat4-blue underline" target="_blank">
+              /l/{page.slug}
+            </Link>
+            {" · "}
+            Entry:{" "}
+            <Link href={`/l/${page.slug}/enter`} className="text-cat4-blue underline" target="_blank">
+              /l/{page.slug}/enter
+            </Link>
+          </span>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/admin/landing-pages/${page.id}/entries`}>View entries</Link>
+          </Button>
+        </div>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="flex flex-wrap gap-3">
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving..." : page ? "Update" : "Create"}
+        </Button>
+        {page && (
+          <Button type="button" variant="destructive" disabled={loading} onClick={handleDelete}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+        )}
+      </div>
+      </form>
+
+      <aside className="min-w-0 xl:sticky xl:top-8">
+        <PromotionPagePreview
+          draft={previewDraft}
+          pageId={page?.id}
+          previewVideoAutoplay={previewVideoAutoplay}
+        />
+      </aside>
+    </div>
+  );
+}
