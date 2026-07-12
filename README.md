@@ -142,14 +142,16 @@ git push -u origin main
 | `SEED_ADMIN_EMAIL` | Optional — only needed for seeding |
 | `SEED_ADMIN_PASSWORD` | Optional — only needed for seeding |
 
-4. Deploy
+4. Deploy (marketing/admin pages are `force-dynamic`, so the Next build does not query Neon at build time)
 
 ### 4. Vercel Blob
 
 In the Vercel project → **Storage** → create a **Blob** store → connect to the project.  
 This sets `BLOB_READ_WRITE_TOKEN` automatically (or paste it into env vars).
 
-### 5. Push schema + seed (one-time, against production Neon)
+### 5. Push schema + seed (required before the live site can load data)
+
+Run this against the **same** `DATABASE_URL` configured in Vercel. Until you do, pages will 500 with missing-relation errors at runtime even if the build succeeds.
 
 ```bash
 DATABASE_URL="your-neon-pooled-url" npm run db:push
@@ -160,7 +162,7 @@ Then log in at `https://your-domain/admin` with those credentials. Change the pa
 
 ### Neon + Vercel integration (optional)
 
-You can also install the **Neon** integration from the Vercel marketplace — it can inject `DATABASE_URL` for you. Still run `db:push` + `db:seed` once after the first deploy.
+You can also install the **Neon** integration from the Vercel marketplace — it can inject `DATABASE_URL` for you. Still run `db:push` + `db:seed` once; the integration does not create application tables.
 
 ## Project Structure
 

@@ -84,6 +84,7 @@ Do not add CRUD REST mirrors of Server Actions.
 - Client: local component state for forms
 - Age gate: cookie `cat4-age-verified`
 - Admin dashboard layouts use `force-dynamic` where needed
+- Marketing + ambassador layouts use `force-dynamic` so Vercel builds do not prerender against Neon (schema may not exist yet at first deploy)
 
 ## UI composition
 

@@ -13,10 +13,6 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateStaticParams() {
-  return PRODUCT_CATEGORIES.map((c) => ({ category: c.slug }));
-}
-
 export async function generateMetadata({ params }: Props) {
   const { category } = await params;
   const valid = PRODUCT_CATEGORIES.some((c) => c.slug === category);

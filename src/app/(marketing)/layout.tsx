@@ -5,6 +5,9 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { AgeGateWrapper } from "@/components/marketing/age-gate-wrapper";
 import { PageViewTracker } from "@/components/marketing/page-view-tracker";
 
+/** CMS-backed pages — never prerender against Neon at build time. */
+export const dynamic = "force-dynamic";
+
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <AgeGateWrapper>

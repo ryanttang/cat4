@@ -4,6 +4,8 @@ import { requireAmbassadorAuth } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { brand } from "@/lib/brand";
 
+export const dynamic = "force-dynamic";
+
 const navItems = [
   { href: "/ambassador", label: "Dashboard" },
   { href: "/ambassador/qr", label: "My QR" },
