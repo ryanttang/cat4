@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { Gift, Sparkles, Trophy } from "lucide-react";
+import { ExternalLink, Gift, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LandingPageHero } from "@/components/marketing/landing-page-hero";
 import { SectionLabel } from "@/components/marketing/section-label";
@@ -49,6 +50,9 @@ export function LandingPageView({
   const active = preview || isPromotionActive(page);
   const entryPath = promotionEntryPath(page.slug);
   const heroAutoplay = preview ? previewVideoAutoplay : true;
+  const featuredProducts = (blocks.featuredProducts ?? []).filter(
+    (product) => product.name?.trim() && product.url?.trim()
+  );
 
   const content = (
     <div className={preview ? "pointer-events-none" : undefined}>
@@ -123,6 +127,61 @@ export function LandingPageView({
             ))}
           </div>
         </div>
+
+        {featuredProducts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-center text-2xl font-bold text-cat4-light">Featured Products</h2>
+            <p className="mx-auto mt-2 max-w-xl text-center text-cat4-light/70">
+              Explore products related to this promotion.
+            </p>
+            <div
+              className={`mt-8 grid gap-4 ${
+                featuredProducts.length === 1
+                  ? "mx-auto max-w-sm"
+                  : featuredProducts.length === 2
+                    ? "sm:grid-cols-2"
+                    : "sm:grid-cols-2 lg:grid-cols-3"
+              }`}
+            >
+              {featuredProducts.map((product) => (
+                <a
+                  key={`${product.name}-${product.url}`}
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-colors hover:border-cat4-blue/50"
+                >
+                  <div className="relative aspect-square bg-cat4-surface/50">
+                    {product.imageUrl ? (
+                      <Image
+                        src={product.imageUrl}
+                        alt={product.name}
+                        fill
+                        className="object-contain p-4 transition-transform group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-cat4-blue/40">
+                        <span className="text-4xl font-bold">{product.name[0]}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="font-semibold text-cat4-light group-hover:text-cat4-blue">
+                      {product.name}
+                    </h3>
+                    {product.description && (
+                      <p className="mt-1 line-clamp-2 text-sm text-cat4-light/60">{product.description}</p>
+                    )}
+                    <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-cat4-blue">
+                      View product
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {active && (
           <div className="rounded-xl border border-cat4-blue/30 bg-gradient-to-br from-cat4-blue/20 to-transparent p-8 text-center">

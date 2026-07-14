@@ -231,6 +231,13 @@ export const subscribers = pgTable(
 
 // ─── Landing Pages ───────────────────────────────────────────────────────────
 
+export type LandingPageFeaturedProduct = {
+  name: string;
+  url: string;
+  description?: string;
+  imageUrl?: string;
+};
+
 export type LandingPageBlock = {
   settings?: {
     passwordProtected?: boolean;
@@ -249,6 +256,8 @@ export type LandingPageBlock = {
   };
   rules?: { content: string };
   prize?: { title: string; description: string; imageUrl?: string };
+  /** External product links shown on the promotion landing page. */
+  featuredProducts?: LandingPageFeaturedProduct[];
 };
 
 export const landingPages = pgTable("landing_pages", {

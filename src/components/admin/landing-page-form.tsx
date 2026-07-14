@@ -15,10 +15,32 @@ import { createLandingPage, updateLandingPage, deleteLandingPage } from "@/lib/a
 import { LANDING_PAGE_TYPES, slugify } from "@/lib/utils";
 import { sweepstakesTemplateBlocks } from "@/lib/mock/sweepstakes-seed";
 import { DEFAULT_HERO_YOUTUBE_URL } from "@/lib/hero-video";
-import type { LandingPage, LandingPageBlock } from "@/lib/db/schema";
-import { ChevronLeft, Sparkles, Trash2 } from "lucide-react";
+import type { LandingPage, LandingPageBlock, LandingPageFeaturedProduct } from "@/lib/db/schema";
+import { ChevronLeft, Plus, Sparkles, Trash2 } from "lucide-react";
 import { adminPanelClass } from "@/components/admin/admin-ui";
 import type { AdminDialogFormProps } from "@/components/admin/admin-form-dialog";
+
+const emptyFeaturedProduct = (): LandingPageFeaturedProduct => ({
+  name: "",
+  url: "",
+  description: "",
+  imageUrl: "",
+});
+
+function normalizeFeaturedProducts(
+  items: LandingPageFeaturedProduct[]
+): LandingPageFeaturedProduct[] | undefined {
+  const cleaned = items
+    .map((item) => ({
+      name: item.name.trim(),
+      url: item.url.trim(),
+      description: item.description?.trim() || undefined,
+      imageUrl: item.imageUrl?.trim() || undefined,
+    }))
+    .filter((item) => item.name && item.url);
+
+  return cleaned.length > 0 ? cleaned : undefined;
+}
 
 export function LandingPageForm({
   page,
@@ -39,6 +61,9 @@ export function LandingPageForm({
   const [imageUrl, setImageUrl] = useState(blocks.hero?.imageUrl ?? "");
   const [prizeTitle, setPrizeTitle] = useState(blocks.prize?.title ?? "");
   const [prizeDesc, setPrizeDesc] = useState(blocks.prize?.description ?? "");
+  const [featuredProducts, setFeaturedProducts] = useState<LandingPageFeaturedProduct[]>(
+    blocks.featuredProducts?.length ? blocks.featuredProducts : []
+  );
   const [rules, setRules] = useState(blocks.rules?.content ?? "");
   const [consentText, setConsentText] = useState(
     blocks.form?.consentText ?? "I agree to the official rules and to receive emails from CAT4."
@@ -50,6 +75,17 @@ export function LandingPageForm({
   const [countdownEnabled, setCountdownEnabled] = useState(blocks.settings?.countdownEnabled ?? true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  function updateFeaturedProduct(
+    index: number,
+    patch: Partial<LandingPageFeaturedProduct>
+  ) {
+    setFeaturedProducts((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...patch };
+      return next;
+    });
+  }
 
   function buildBlocks(): LandingPageBlock {
     return {
@@ -74,6 +110,7 @@ export function LandingPageForm({
       },
       rules: { content: rules },
       prize: prizeTitle ? { title: prizeTitle, description: prizeDesc } : undefined,
+      featuredProducts: normalizeFeaturedProducts(featuredProducts),
     };
   }
 
@@ -98,6 +135,7 @@ export function LandingPageForm({
       imageUrl,
       prizeTitle,
       prizeDesc,
+      featuredProducts,
       rules,
       consentText,
       passwordProtected,
@@ -116,6 +154,7 @@ export function LandingPageForm({
     setVideoUrl(template.hero?.videoUrl ?? DEFAULT_HERO_YOUTUBE_URL);
     setPrizeTitle(template.prize?.title ?? "");
     setPrizeDesc(template.prize?.description ?? "");
+    setFeaturedProducts(template.featuredProducts?.length ? template.featuredProducts : []);
     setRules(template.rules?.content ?? "");
     setConsentText(template.form?.consentText ?? consentText);
     if (!startsAt) {
@@ -131,6 +170,15 @@ export function LandingPageForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+
+    const incomplete = featuredProducts.find(
+      (item) => (item.name.trim() && !item.url.trim()) || (!item.name.trim() && item.url.trim())
+    );
+    if (incomplete) {
+      setError("Featured products need both a name and an external URL.");
+      setLoading(false);
+      return;
+    }
 
     const data = {
       title,
@@ -291,6 +339,76 @@ export function LandingPageForm({
           <Label>Prize Description</Label>
           <Textarea value={prizeDesc} onChange={(e) => setPrizeDesc(e.target.value)} className="mt-1" />
         </div>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <div>
+          <h3 className="font-semibold">Featured Products (optional)</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Link out to related products on external retailer or brand pages.
+          </p>
+        </div>
+        {featuredProducts.map((product, index) => (
+          <div key={index} className="space-y-3 rounded-lg border border-border p-3">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Product {index + 1}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setFeaturedProducts((prev) => prev.filter((_, i) => i !== index))}
+                aria-label={`Remove product ${index + 1}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={product.name}
+                  onChange={(e) => updateFeaturedProduct(index, { name: e.target.value })}
+                  placeholder="Product name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>External URL</Label>
+                <Input
+                  type="url"
+                  value={product.url}
+                  onChange={(e) => updateFeaturedProduct(index, { url: e.target.value })}
+                  placeholder="https://"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Description (optional)</Label>
+              <Input
+                value={product.description ?? ""}
+                onChange={(e) => updateFeaturedProduct(index, { description: e.target.value })}
+                placeholder="Short blurb"
+                className="mt-1"
+              />
+            </div>
+            <FileUpload
+              label="Product Image (optional)"
+              accept="image/*"
+              value={product.imageUrl}
+              onChange={(url) => updateFeaturedProduct(index, { imageUrl: url })}
+            />
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setFeaturedProducts((prev) => [...prev, emptyFeaturedProduct()])}
+        >
+          <Plus className="mr-1 h-4 w-4" />
+          Add Product
+        </Button>
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
