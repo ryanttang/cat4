@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, Gift, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -153,11 +152,10 @@ export function LandingPageView({
                 >
                   <div className="relative aspect-square bg-cat4-surface/50">
                     {product.imageUrl ? (
-                      <Image
+                      <img
                         src={product.imageUrl}
                         alt={product.name}
-                        fill
-                        className="object-contain p-4 transition-transform group-hover:scale-105"
+                        className="absolute inset-0 h-full w-full object-contain p-4 transition-transform group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-cat4-blue/40">

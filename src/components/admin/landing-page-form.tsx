@@ -392,8 +392,21 @@ export function LandingPageForm({
                 className="mt-1"
               />
             </div>
+            <div>
+              <Label>Image URL (optional)</Label>
+              <Input
+                type="url"
+                value={product.imageUrl ?? ""}
+                onChange={(e) => updateFeaturedProduct(index, { imageUrl: e.target.value })}
+                placeholder="https://"
+                className="mt-1"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Paste an external image link, or upload a file below.
+              </p>
+            </div>
             <FileUpload
-              label="Product Image (optional)"
+              label="Product Image (upload)"
               accept="image/*"
               value={product.imageUrl}
               onChange={(url) => updateFeaturedProduct(index, { imageUrl: url })}
