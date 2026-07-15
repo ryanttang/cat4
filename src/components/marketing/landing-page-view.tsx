@@ -220,12 +220,13 @@ export function LandingPageView({
             </p>
             <div
               className={`mt-5 grid gap-3 sm:mt-8 sm:gap-4 ${
-                featuredProducts.length === 1
-                  ? "mx-auto max-w-sm"
-                  : featuredProducts.length === 2
-                    ? "grid-cols-2"
-                    : "grid-cols-3"
+                featuredProducts.length === 1 ? "mx-auto max-w-sm" : ""
               }`}
+              style={
+                featuredProducts.length > 1
+                  ? { gridTemplateColumns: `repeat(${featuredProducts.length}, minmax(0, 1fr))` }
+                  : undefined
+              }
             >
               {featuredProducts.map((product) => (
                 <a
@@ -233,7 +234,7 @@ export function LandingPageView({
                   href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-colors hover:border-cat4-blue/50"
+                  className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-colors hover:border-cat4-blue/50"
                 >
                   <div className="relative aspect-square bg-cat4-surface/50">
                     {product.imageUrl ? (
