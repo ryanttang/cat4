@@ -270,6 +270,8 @@ export type LandingPageBlock = {
     imageUrl?: string;
     headline: string;
     subheadline?: string;
+    /** Primary call-to-action button label on the promotion page. */
+    ctaLabel?: string;
   };
   form?: {
     fields: Array<{ name: string; label: string; required: boolean; type: string }>;

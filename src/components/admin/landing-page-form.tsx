@@ -19,6 +19,7 @@ import {
   DEFAULT_HOW_IT_WORKS_STEPS,
   DEFAULT_HOW_IT_WORKS_TITLE,
   DEFAULT_KEY_DETAILS_TITLE,
+  DEFAULT_PROMOTION_CTA_LABEL,
   getHowItWorksFromBlocks,
   getLandingPagePrizes,
   normalizeKeyDetails,
@@ -114,6 +115,7 @@ export function LandingPageForm({
   const [status, setStatus] = useState(page?.status ?? "draft");
   const [headline, setHeadline] = useState(blocks.hero?.headline ?? "");
   const [subheadline, setSubheadline] = useState(blocks.hero?.subheadline ?? "");
+  const [ctaLabel, setCtaLabel] = useState(blocks.hero?.ctaLabel ?? "");
   const [videoUrl, setVideoUrl] = useState(blocks.hero?.videoUrl ?? "");
   const [previewVideoAutoplay, setPreviewVideoAutoplay] = useState(false);
   const [imageUrl, setImageUrl] = useState(blocks.hero?.imageUrl ?? "");
@@ -189,6 +191,7 @@ export function LandingPageForm({
       hero: {
         headline: headline || title,
         subheadline,
+        ctaLabel: ctaLabel.trim() || undefined,
         videoUrl: videoUrl || undefined,
         imageUrl: imageUrl || undefined,
       },
@@ -231,6 +234,7 @@ export function LandingPageForm({
       status,
       headline,
       subheadline,
+      ctaLabel,
       videoUrl,
       imageUrl,
       prizes,
@@ -257,6 +261,7 @@ export function LandingPageForm({
     setType("sweepstakes");
     setHeadline(template.hero?.headline ?? "");
     setSubheadline(template.hero?.subheadline ?? "");
+    setCtaLabel(template.hero?.ctaLabel ?? "");
     setVideoUrl(template.hero?.videoUrl ?? DEFAULT_HERO_YOUTUBE_URL);
     setPrizes(getLandingPagePrizes(template));
     setHowItWorksTitle(getHowItWorksFromBlocks(template).title);
@@ -414,6 +419,18 @@ export function LandingPageForm({
         <div>
           <Label>Subheadline</Label>
           <Input value={subheadline} onChange={(e) => setSubheadline(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label>CTA Button Label</Label>
+          <Input
+            value={ctaLabel}
+            onChange={(e) => setCtaLabel(e.target.value)}
+            placeholder={DEFAULT_PROMOTION_CTA_LABEL}
+            className="mt-1"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Text for the primary action button on the promotion page.
+          </p>
         </div>
         <div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">

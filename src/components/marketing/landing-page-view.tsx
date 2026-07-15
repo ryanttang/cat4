@@ -11,6 +11,7 @@ import {
   getHowItWorksFromBlocks,
   getKeyDetailsFromBlocks,
   getLandingPagePrizes,
+  getPromotionCtaLabel,
   getPromotionSettings,
   isPromotionActive,
   PROMOTION_TYPE_LABELS,
@@ -36,6 +37,7 @@ export function LandingPageView({
   const prizes = getLandingPagePrizes(blocks);
   const howItWorks = getHowItWorksFromBlocks(blocks);
   const keyDetails = getKeyDetailsFromBlocks(blocks);
+  const ctaLabel = getPromotionCtaLabel(blocks);
   const active = preview || isPromotionActive(page);
   const entryPath = promotionEntryPath(page.slug);
   const heroAutoplay = preview ? previewVideoAutoplay : true;
@@ -75,7 +77,7 @@ export function LandingPageView({
 
           {active ? (
             <Button asChild size="lg" className="mt-8 px-10 text-base">
-              <Link href={entryPath}>Join Now</Link>
+              <Link href={entryPath}>{ctaLabel}</Link>
             </Button>
           ) : (
             <p className="mt-8 rounded-full bg-white/10 px-6 py-2 text-sm text-cat4-light/80">
@@ -107,7 +109,7 @@ export function LandingPageView({
                 <p className="mx-auto mt-3 max-w-xl text-cat4-light/80">{prize.description}</p>
                 {active && index === prizes.length - 1 && (
                   <Button asChild size="lg" className="mt-6">
-                    <Link href={entryPath}>Join Now</Link>
+                    <Link href={entryPath}>{ctaLabel}</Link>
                   </Button>
                 )}
               </div>
@@ -224,7 +226,7 @@ export function LandingPageView({
               Complete the entry wizard for your chance to win.
             </p>
             <Button asChild size="lg" className="mt-6 px-10">
-              <Link href={entryPath}>Join Now</Link>
+              <Link href={entryPath}>{ctaLabel}</Link>
             </Button>
           </div>
         )}

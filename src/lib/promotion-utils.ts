@@ -8,6 +8,7 @@ import type {
 
 export const DEFAULT_HOW_IT_WORKS_TITLE = "How It Works";
 export const DEFAULT_KEY_DETAILS_TITLE = "Key Details";
+export const DEFAULT_PROMOTION_CTA_LABEL = "Join Now";
 
 export const KEY_DETAILS_FIELD_LABELS = {
   promotionPeriod: "Promotion Period",
@@ -128,6 +129,10 @@ export function getPromotionSettings(blocks: LandingPageBlock) {
     accessPassword: blocks.settings?.accessPassword ?? "",
     countdownEnabled: blocks.settings?.countdownEnabled ?? true,
   };
+}
+
+export function getPromotionCtaLabel(blocks: LandingPageBlock): string {
+  return blocks.hero?.ctaLabel?.trim() || DEFAULT_PROMOTION_CTA_LABEL;
 }
 
 export function promotionAccessStorageKey(slug: string): string {
