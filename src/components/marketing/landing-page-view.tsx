@@ -52,7 +52,7 @@ export function LandingPageView({
   const content = (
     <div className={preview ? "pointer-events-none" : undefined}>
       <div className="min-h-screen bg-cat4-dark">
-      <section className="relative min-h-[65vh] overflow-hidden">
+      <section className="relative min-h-0 overflow-hidden sm:min-h-[55vh] lg:min-h-[65vh]">
         <LandingPageHero
           key={preview ? `${blocks.hero?.videoUrl ?? ""}-${previewVideoAutoplay}` : undefined}
           videoUrl={blocks.hero?.videoUrl}
@@ -61,22 +61,22 @@ export function LandingPageView({
         />
         <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
 
-        <div className="relative z-10 flex min-h-[65vh] flex-col items-center justify-center px-4 py-12 text-center sm:py-16">
+        <div className="relative z-10 flex min-h-0 flex-col items-center justify-center px-4 py-8 text-center sm:min-h-[55vh] sm:py-14 lg:min-h-[65vh] lg:py-16">
           <Link
             href="/"
-            className="mb-4 text-sm font-semibold tracking-widest text-cat4-light/80 hover:text-cat4-light sm:mb-6"
+            className="mb-3 text-sm font-semibold tracking-widest text-cat4-light/80 hover:text-cat4-light sm:mb-6"
           >
             CAT4
           </Link>
           <span className="rounded-full bg-cat4-blue/30 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-cat4-light">
             {PROMOTION_TYPE_LABELS[page.type] ?? page.type}
           </span>
-          <div className="mt-4 w-full max-w-3xl rounded-2xl border border-white/15 bg-black/50 px-5 py-5 shadow-lg backdrop-blur-md sm:mt-5 sm:px-8 sm:py-7">
-            <h1 className="text-3xl font-bold leading-tight text-cat4-light sm:text-5xl lg:text-6xl">
+          <div className="mt-3 w-full max-w-3xl rounded-2xl border border-white/15 bg-black/50 px-4 py-4 shadow-lg backdrop-blur-md sm:mt-5 sm:px-8 sm:py-7">
+            <h1 className="text-2xl font-bold leading-tight text-cat4-light sm:text-5xl lg:text-6xl">
               {blocks.hero?.headline ?? page.title}
             </h1>
             {blocks.hero?.subheadline && (
-              <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-cat4-light/90 sm:mt-4 sm:text-lg">
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-cat4-light/90 sm:mt-4 sm:text-lg">
                 {blocks.hero.subheadline}
               </p>
             )}
@@ -85,18 +85,18 @@ export function LandingPageView({
 
           {showCta &&
             (active ? (
-              <Button asChild size="lg" className="mt-6 px-8 text-base sm:mt-8 sm:px-10">
+              <Button asChild size="lg" className="mt-4 px-8 text-base sm:mt-8 sm:px-10">
                 <Link href={entryPath}>{ctaLabel}</Link>
               </Button>
             ) : (
-              <p className="mt-6 rounded-full bg-white/10 px-6 py-2 text-sm text-cat4-light/80 sm:mt-8">
+              <p className="mt-4 rounded-full bg-white/10 px-6 py-2 text-sm text-cat4-light/80 sm:mt-8">
                 This promotion is not currently active
               </p>
             ))}
         </div>
       </section>
 
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-16">
         {sections.prizes && prizes.length > 0 && (
           <div className="mb-10 sm:mb-12">
             <div
