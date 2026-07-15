@@ -9,6 +9,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      {
+        error:
+          "Media uploads are not configured. Set BLOB_READ_WRITE_TOKEN (Vercel → Storage → Blob).",
+      },
+      { status: 503 }
+    );
+  }
+
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
 
@@ -26,6 +36,7 @@ export async function POST(request: Request) {
   const blob = await put(filename, file, {
     access: "public",
     addRandomSuffix: true,
+    token: process.env.BLOB_READ_WRITE_TOKEN,
   });
 
   return NextResponse.json({ url: blob.url });
