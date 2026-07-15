@@ -20,7 +20,7 @@
 
 | Admin / marketing label | Code / routes |
 |-------------------------|---------------|
-| Promotions | `landing-pages`, `/l/[slug]`, `/admin/landing-pages` |
+| Promotions | `landing-pages`, `/[slug]`, `/admin/landing-pages` |
 | Rewards | QR codes, `/r/[code]`, `/admin/rewards` |
 | Subscribes | `captures`, subscribers |
 | Home (CMS) | `homepage` setting JSON — not `hero_blocks` |

@@ -61,7 +61,7 @@ export async function QrDestinationRouter({ qrCode, searchParams }: QrDestinatio
       if (!config.landingPageId) notFound();
       const page = await getLandingPageById(config.landingPageId);
       if (!page || page.status !== "published") notFound();
-      redirect(appendUtm(`/l/${page.slug}`, qrCode.code, searchParams));
+      redirect(appendUtm(`/${page.slug}`, qrCode.code, searchParams));
     }
 
     case "survey": {

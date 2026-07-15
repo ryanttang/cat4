@@ -16,7 +16,7 @@ import {
 import { landingEntryAction } from "@/lib/actions/public";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { PromotionPasswordGate } from "@/components/marketing/promotion-password-gate";
-import { getPromotionSettings, PROMOTION_TYPE_LABELS } from "@/lib/promotion-utils";
+import { getPromotionSettings, PROMOTION_TYPE_LABELS, promotionPath } from "@/lib/promotion-utils";
 import { PRODUCT_CATEGORIES } from "@/lib/utils";
 import type { LandingPage, LandingPageBlock } from "@/lib/db/schema";
 
@@ -163,7 +163,7 @@ export function PromotionEntryWizard({ page }: PromotionEntryWizardProps) {
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button asChild variant="outline" className="border-cat4-light/30 text-cat4-light">
-              <Link href={`/l/${page.slug}`}>Back to promotion</Link>
+              <Link href={promotionPath(page.slug)}>Back to promotion</Link>
             </Button>
             <Button asChild>
               <Link href="/">Explore CAT4</Link>
@@ -182,7 +182,7 @@ export function PromotionEntryWizard({ page }: PromotionEntryWizardProps) {
     >
     <div className="mx-auto max-w-xl px-4 py-10 sm:py-16">
       <Button asChild variant="ghost" className="-ml-2 mb-6 text-cat4-light/80 hover:text-cat4-light">
-        <Link href={`/l/${page.slug}`}>
+        <Link href={promotionPath(page.slug)}>
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back
         </Link>

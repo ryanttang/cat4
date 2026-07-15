@@ -39,7 +39,7 @@ Quick map of product domains → schema → routes → primary modules.
 | Tables | `landing_pages`, `landing_page_entries` |
 | Types | sweepstakes, raffle, giveaway, contest |
 | Data | `lib/data/landing-pages.ts` |
-| Public | `/l/[slug]`, `/l/[slug]/enter` |
+| Public | `/[slug]`, `/[slug]/enter` (legacy `/l/*` redirects) |
 | Admin | `/admin/landing-pages` (UI: “Promotions”) |
 
 ## Surveys & polls
@@ -116,7 +116,7 @@ Quick map of product domains → schema → routes → primary modules.
 
 | Prefix | Domain |
 |--------|--------|
-| `/l/` | Promotions |
+| `/[slug]` | Promotions |
 | `/r/` | QR / rewards destinations |
 | `/a/` | Ambassador vanity hubs |
 | `/survey/` | Surveys |

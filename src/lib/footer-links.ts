@@ -26,7 +26,7 @@ export async function getFooterLinks(): Promise<{
 }> {
   const publishedPages = await getPublishedLandingPages();
   const promotionLinks: FooterLink[] = publishedPages.map((page) => ({
-    href: `/l/${page.slug}`,
+    href: `/${page.slug}`,
     label: page.title,
   }));
 

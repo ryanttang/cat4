@@ -79,7 +79,7 @@ export function LandingPagesAdmin({ pages, entryCounts }: LandingPagesAdminProps
                       </Button>
                       {page.status === "published" && (
                         <Button asChild variant="ghost" size="sm">
-                          <Link href={`/l/${page.slug}`} target="_blank">
+                          <Link href={`/${page.slug}`} target="_blank">
                             <ExternalLink className="mr-1 h-3 w-3" />
                             View
                           </Link>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isReservedPromotionSlug } from "@/lib/promotion-utils";
 import { PRODUCT_CATEGORY_SLUGS } from "@/lib/categories";
 
 export const subscribeSchema = z.object({
@@ -102,7 +103,12 @@ export const aboutSectionSchema = z.object({
 
 export const landingPageSchema = z.object({
   title: z.string().min(1),
-  slug: z.string().min(1),
+  slug: z
+    .string()
+    .min(1)
+    .refine((value) => !isReservedPromotionSlug(value), {
+      message: "This slug conflicts with an existing site path",
+    }),
   type: z.enum(["sweepstakes", "raffle", "giveaway", "contest", "promotion"]),
   status: z.enum(["draft", "published", "archived"]).optional(),
   blocks: z.record(z.unknown()).optional(),

@@ -22,7 +22,7 @@ Keep in sync with `src/lib/brand.ts` → `colors` and `tailwind.config.ts` → `
 - Product catalog + PDPs across 5 categories (`flower`, `preroll`, `cartridge`, `extract`, `merch`)
 - Education hub, About, store locator (`/find`), subscribe
 - Age gate (21+)
-- Promotions (`/l/[slug]`) — sweepstakes, raffles, giveaways, contests
+- Promotions (`/[slug]`) — sweepstakes, raffles, giveaways, contests, promotions
 - Surveys & polls (`/survey/[slug]`, `/poll/[slug]`) with optional live results
 - QR / rewards destinations (`/r/[code]`) — product, link hub, claim, etc.
 - Ambassador vanity hubs (`/a/[slug]`)

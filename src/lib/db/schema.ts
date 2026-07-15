@@ -260,11 +260,21 @@ export type LandingPageKeyDetails = {
   redemptionWindow?: string;
 };
 
+export type LandingPageSectionVisibility = {
+  prizes?: boolean;
+  keyDetails?: boolean;
+  howItWorks?: boolean;
+  featuredProducts?: boolean;
+  rules?: boolean;
+};
+
 export type LandingPageBlock = {
   settings?: {
     passwordProtected?: boolean;
     accessPassword?: string;
     countdownEnabled?: boolean;
+    /** Per-section visibility on the public promotion page. Omit / true = shown. */
+    sections?: LandingPageSectionVisibility;
   };
   hero?: {
     videoUrl?: string;
@@ -273,6 +283,8 @@ export type LandingPageBlock = {
     subheadline?: string;
     /** Primary call-to-action button label on the promotion page. */
     ctaLabel?: string;
+    /** When true, entry CTAs are hidden on the promotion page. */
+    ctaHidden?: boolean;
   };
   form?: {
     fields: Array<{ name: string; label: string; required: boolean; type: string }>;

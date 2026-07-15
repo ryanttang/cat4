@@ -32,7 +32,7 @@ export const MOCK_QR_CODES: QrCode[] = [
       hubBio: "Premium cannabis products crafted with precision.",
       links: [
         { label: "Shop Products", url: "/products" },
-        { label: "Summer Sweepstakes", url: "/l/summer-sweepstakes" },
+        { label: "Summer Sweepstakes", url: "/summer-sweepstakes" },
         { label: "Subscribe", url: "/subscribe" },
       ],
     },

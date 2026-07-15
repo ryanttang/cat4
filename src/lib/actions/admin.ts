@@ -227,6 +227,9 @@ export async function createLandingPage(data: unknown): Promise<ActionResult> {
     },
     session.user.id
   );
+  revalidatePath(`/${parsed.data.slug}`);
+  revalidatePath(`/${parsed.data.slug}/enter`);
+  revalidatePath("/admin/landing-pages");
   return { success: true, id: row.id };
 }
 
@@ -244,7 +247,8 @@ export async function updateLandingPage(id: string, data: unknown): Promise<Acti
     startsAt: parsed.data.startsAt ? new Date(parsed.data.startsAt) : null,
     endsAt: parsed.data.endsAt ? new Date(parsed.data.endsAt) : null,
   });
-  revalidatePath(`/l/${parsed.data.slug}`);
+  revalidatePath(`/${parsed.data.slug}`);
+  revalidatePath(`/${parsed.data.slug}/enter`);
   return { success: true };
 }
 

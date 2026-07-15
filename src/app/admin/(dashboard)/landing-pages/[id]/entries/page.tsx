@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExportEntriesButton } from "@/components/admin/export-entries-button";
 import { adminTableWrapClass } from "@/components/admin/admin-ui";
 import { formatDateTime } from "@/lib/utils";
+import { promotionEntryPath, promotionPath } from "@/lib/promotion-utils";
 import { ChevronLeft } from "lucide-react";
 
 type Props = { params: Promise<{ id: string }> };
@@ -36,13 +37,13 @@ export default async function LandingPageEntriesPage({ params }: Props) {
           {page.status === "published" && (
             <p className="mt-2 text-sm">
               Landing page:{" "}
-              <Link href={`/l/${page.slug}`} className="text-cat4-blue underline" target="_blank">
-                /l/{page.slug}
+              <Link href={promotionPath(page.slug)} className="text-cat4-blue underline" target="_blank">
+                /{page.slug}
               </Link>
               {" · "}
               Entry wizard:{" "}
-              <Link href={`/l/${page.slug}/enter`} className="text-cat4-blue underline" target="_blank">
-                /l/{page.slug}/enter
+              <Link href={promotionEntryPath(page.slug)} className="text-cat4-blue underline" target="_blank">
+                /{page.slug}/enter
               </Link>
             </p>
           )}

@@ -4,6 +4,7 @@ import type {
   LandingPageHowItWorksStep,
   LandingPageKeyDetails,
   LandingPagePrizeBlock,
+  LandingPageSectionVisibility,
 } from "@/lib/db/schema";
 
 export const DEFAULT_HOW_IT_WORKS_TITLE = "How It Works";
@@ -123,8 +124,34 @@ export function isPromotionActive(page: LandingPage): boolean {
   return true;
 }
 
+export function promotionPath(slug: string): string {
+  return `/${slug}`;
+}
+
 export function promotionEntryPath(slug: string): string {
-  return `/l/${slug}/enter`;
+  return `/${slug}/enter`;
+}
+
+/** First-path segments reserved by static marketing / short-link routes. */
+export const RESERVED_PROMOTION_SLUGS = new Set([
+  "about",
+  "admin",
+  "ambassador",
+  "api",
+  "a",
+  "education",
+  "find",
+  "l",
+  "login",
+  "poll",
+  "products",
+  "r",
+  "subscribe",
+  "survey",
+]);
+
+export function isReservedPromotionSlug(slug: string): boolean {
+  return RESERVED_PROMOTION_SLUGS.has(slug.trim().toLowerCase());
 }
 
 export function getPromotionSettings(blocks: LandingPageBlock) {
@@ -135,8 +162,23 @@ export function getPromotionSettings(blocks: LandingPageBlock) {
   };
 }
 
+export function getPromotionSections(blocks: LandingPageBlock): Required<LandingPageSectionVisibility> {
+  const sections = blocks.settings?.sections;
+  return {
+    prizes: sections?.prizes !== false,
+    keyDetails: sections?.keyDetails !== false,
+    howItWorks: sections?.howItWorks !== false,
+    featuredProducts: sections?.featuredProducts !== false,
+    rules: sections?.rules !== false,
+  };
+}
+
 export function getPromotionCtaLabel(blocks: LandingPageBlock): string {
   return blocks.hero?.ctaLabel?.trim() || DEFAULT_PROMOTION_CTA_LABEL;
+}
+
+export function isPromotionCtaVisible(blocks: LandingPageBlock): boolean {
+  return !blocks.hero?.ctaHidden;
 }
 
 export function promotionAccessStorageKey(slug: string): string {

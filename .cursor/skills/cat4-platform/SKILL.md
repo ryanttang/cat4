@@ -70,7 +70,7 @@ UI (RSC pages / client forms)
 | Marketing | `src/app/(marketing)/` | Public (+ age gate) |
 | Admin CMS | `src/app/admin/` | `admin` \| `staff` (middleware) |
 | Ambassador portal | `src/app/ambassador/` | `ambassador` role |
-| Short public links | `/l/*` promotions, `/r/*` QR, `/a/*` ambassador hubs, `/survey/*`, `/poll/*` | Public |
+| Short public links | `/[slug]` promotions, `/r/*` QR, `/a/*` ambassador hubs, `/survey/*`, `/poll/*` | Public |
 | API | `src/app/api/` | Thin exceptions only |
 
 Components: `components/ui` (primitives) · `components/marketing` · `components/admin` · `components/surveys`.

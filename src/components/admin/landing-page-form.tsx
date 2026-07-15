@@ -22,7 +22,10 @@ import {
   DEFAULT_PROMOTION_CTA_LABEL,
   getHowItWorksFromBlocks,
   getLandingPagePrizes,
+  getPromotionSections,
   normalizeKeyDetails,
+  promotionEntryPath,
+  promotionPath,
 } from "@/lib/promotion-utils";
 import type {
   LandingPage,
@@ -116,6 +119,7 @@ export function LandingPageForm({
   const [headline, setHeadline] = useState(blocks.hero?.headline ?? "");
   const [subheadline, setSubheadline] = useState(blocks.hero?.subheadline ?? "");
   const [ctaLabel, setCtaLabel] = useState(blocks.hero?.ctaLabel ?? "");
+  const [ctaHidden, setCtaHidden] = useState(blocks.hero?.ctaHidden ?? false);
   const [videoUrl, setVideoUrl] = useState(blocks.hero?.videoUrl ?? "");
   const [previewVideoAutoplay, setPreviewVideoAutoplay] = useState(false);
   const [imageUrl, setImageUrl] = useState(blocks.hero?.imageUrl ?? "");
@@ -151,8 +155,16 @@ export function LandingPageForm({
   const [passwordProtected, setPasswordProtected] = useState(blocks.settings?.passwordProtected ?? false);
   const [accessPassword, setAccessPassword] = useState(blocks.settings?.accessPassword ?? "");
   const [countdownEnabled, setCountdownEnabled] = useState(blocks.settings?.countdownEnabled ?? true);
+  const [sections, setSections] = useState(() => getPromotionSections(blocks));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  function updateSectionVisibility(
+    key: keyof typeof sections,
+    visible: boolean
+  ) {
+    setSections((prev) => ({ ...prev, [key]: visible }));
+  }
 
   function updateFeaturedProduct(
     index: number,
@@ -187,11 +199,13 @@ export function LandingPageForm({
         passwordProtected,
         accessPassword: passwordProtected ? accessPassword : undefined,
         countdownEnabled,
+        sections,
       },
       hero: {
         headline: headline || title,
         subheadline,
         ctaLabel: ctaLabel.trim() || undefined,
+        ctaHidden: ctaHidden || undefined,
         videoUrl: videoUrl || undefined,
         imageUrl: imageUrl || undefined,
       },
@@ -235,6 +249,7 @@ export function LandingPageForm({
       headline,
       subheadline,
       ctaLabel,
+      ctaHidden,
       videoUrl,
       imageUrl,
       prizes,
@@ -251,6 +266,7 @@ export function LandingPageForm({
       passwordProtected,
       accessPassword,
       countdownEnabled,
+      sections,
       startsAt,
       endsAt,
     ]
@@ -262,6 +278,7 @@ export function LandingPageForm({
     setHeadline(template.hero?.headline ?? "");
     setSubheadline(template.hero?.subheadline ?? "");
     setCtaLabel(template.hero?.ctaLabel ?? "");
+    setCtaHidden(template.hero?.ctaHidden ?? false);
     setVideoUrl(template.hero?.videoUrl ?? DEFAULT_HERO_YOUTUBE_URL);
     setPrizes(getLandingPagePrizes(template));
     setHowItWorksTitle(getHowItWorksFromBlocks(template).title);
@@ -276,6 +293,7 @@ export function LandingPageForm({
     setPurchaseLimits(template.keyDetails?.purchaseLimits ?? "");
     setRedemptionWindow(template.keyDetails?.redemptionWindow ?? "");
     setFeaturedProducts(template.featuredProducts?.length ? template.featuredProducts : []);
+    setSections(getPromotionSections(template));
     setRules(template.rules?.content ?? "");
     setConsentText(template.form?.consentText ?? consentText);
     if (!startsAt) {
@@ -421,17 +439,30 @@ export function LandingPageForm({
           <Input value={subheadline} onChange={(e) => setSubheadline(e.target.value)} className="mt-1" />
         </div>
         <div>
-          <Label>CTA Button Label</Label>
-          <Input
-            value={ctaLabel}
-            onChange={(e) => setCtaLabel(e.target.value)}
-            placeholder={DEFAULT_PROMOTION_CTA_LABEL}
-            className="mt-1"
-          />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Text for the primary action button on the promotion page.
-          </p>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label>Hide CTA Button</Label>
+              <p className="text-xs text-muted-foreground">
+                Hide entry buttons across the promotion page.
+              </p>
+            </div>
+            <Switch checked={ctaHidden} onCheckedChange={setCtaHidden} />
+          </div>
         </div>
+        {!ctaHidden && (
+          <div>
+            <Label>CTA Button Label</Label>
+            <Input
+              value={ctaLabel}
+              onChange={(e) => setCtaLabel(e.target.value)}
+              placeholder={DEFAULT_PROMOTION_CTA_LABEL}
+              className="mt-1"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Text for the primary action button on the promotion page.
+            </p>
+          </div>
+        )}
         <div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="min-w-0 flex-1">
@@ -463,11 +494,23 @@ export function LandingPageForm({
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
-        <div>
-          <h3 className="font-semibold">Prize Blocks (optional)</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Add one or more prizes to highlight on the promotion page.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-semibold">Prize Blocks (optional)</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Add one or more prizes to highlight on the promotion page.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Label htmlFor="show-prizes" className="text-sm font-normal">
+              Show
+            </Label>
+            <Switch
+              id="show-prizes"
+              checked={sections.prizes}
+              onCheckedChange={(v) => updateSectionVisibility("prizes", v)}
+            />
+          </div>
         </div>
         {prizes.map((prize, index) => (
           <div key={index} className="space-y-3 rounded-lg border border-border p-3">
@@ -538,11 +581,23 @@ export function LandingPageForm({
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
-        <div>
-          <h3 className="font-semibold">Key Details (optional)</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Highlight promotion terms visitors should know at a glance.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-semibold">Key Details (optional)</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Highlight promotion terms visitors should know at a glance.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Label htmlFor="show-key-details" className="text-sm font-normal">
+              Show
+            </Label>
+            <Switch
+              id="show-key-details"
+              checked={sections.keyDetails}
+              onCheckedChange={(v) => updateSectionVisibility("keyDetails", v)}
+            />
+          </div>
         </div>
         <div>
           <Label>Section Title</Label>
@@ -592,11 +647,23 @@ export function LandingPageForm({
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
-        <div>
-          <h3 className="font-semibold">How It Works</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Customize the steps shown on the promotion landing page.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-semibold">How It Works</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Customize the steps shown on the promotion landing page.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Label htmlFor="show-how-it-works" className="text-sm font-normal">
+              Show
+            </Label>
+            <Switch
+              id="show-how-it-works"
+              checked={sections.howItWorks}
+              onCheckedChange={(v) => updateSectionVisibility("howItWorks", v)}
+            />
+          </div>
         </div>
         <div>
           <Label>Section Title</Label>
@@ -652,11 +719,23 @@ export function LandingPageForm({
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
-        <div>
-          <h3 className="font-semibold">Featured Products (optional)</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Link out to related products on external retailer or brand pages.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-semibold">Featured Products (optional)</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Link out to related products on external retailer or brand pages.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Label htmlFor="show-featured-products" className="text-sm font-normal">
+              Show
+            </Label>
+            <Switch
+              id="show-featured-products"
+              checked={sections.featuredProducts}
+              onCheckedChange={(v) => updateSectionVisibility("featuredProducts", v)}
+            />
+          </div>
         </div>
         {featuredProducts.map((product, index) => (
           <div key={index} className="space-y-3 rounded-lg border border-border p-3">
@@ -743,7 +822,24 @@ export function LandingPageForm({
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
-        <h3 className="font-semibold">Rules Block</h3>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-semibold">Rules Block</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Official rules shown at the bottom of the promotion page.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Label htmlFor="show-rules" className="text-sm font-normal">
+              Show
+            </Label>
+            <Switch
+              id="show-rules"
+              checked={sections.rules}
+              onCheckedChange={(v) => updateSectionVisibility("rules", v)}
+            />
+          </div>
+        </div>
         <div>
           <Label>Official Rules</Label>
           <Textarea rows={8} value={rules} onChange={(e) => setRules(e.target.value)} className="mt-1" />
@@ -800,13 +896,13 @@ export function LandingPageForm({
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <span className="text-muted-foreground">
             Landing:{" "}
-            <Link href={`/l/${page.slug}`} className="text-cat4-blue underline" target="_blank">
-              /l/{page.slug}
+            <Link href={promotionPath(page.slug)} className="text-cat4-blue underline" target="_blank">
+              /{page.slug}
             </Link>
             {" · "}
             Entry:{" "}
-            <Link href={`/l/${page.slug}/enter`} className="text-cat4-blue underline" target="_blank">
-              /l/{page.slug}/enter
+            <Link href={promotionEntryPath(page.slug)} className="text-cat4-blue underline" target="_blank">
+              /{page.slug}/enter
             </Link>
           </span>
           <Button asChild variant="outline" size="sm">
