@@ -89,12 +89,15 @@ export function getKeyDetailsFromBlocks(blocks: LandingPageBlock): {
   const details = normalizeKeyDetails(blocks.keyDetails ?? {});
   if (!details) return null;
 
-  const items = [
+  const candidates: Array<{ label: string; value: string | undefined }> = [
     { label: KEY_DETAILS_FIELD_LABELS.promotionPeriod, value: details.promotionPeriod },
     { label: KEY_DETAILS_FIELD_LABELS.eligibleProducts, value: details.eligibleProducts },
     { label: KEY_DETAILS_FIELD_LABELS.purchaseLimits, value: details.purchaseLimits },
     { label: KEY_DETAILS_FIELD_LABELS.redemptionWindow, value: details.redemptionWindow },
-  ].filter((item): item is { label: string; value: string } => Boolean(item.value));
+  ];
+  const items = candidates.filter(
+    (item): item is { label: string; value: string } => Boolean(item.value)
+  );
 
   if (items.length === 0) return null;
 
