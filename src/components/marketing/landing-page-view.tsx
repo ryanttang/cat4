@@ -219,13 +219,10 @@ export function LandingPageView({
               Explore products related to this promotion.
             </p>
             <div
-              className={`mt-5 grid gap-3 sm:mt-8 sm:gap-4 ${
-                featuredProducts.length === 1 ? "mx-auto max-w-sm" : ""
-              }`}
-              style={
-                featuredProducts.length > 1
-                  ? { gridTemplateColumns: `repeat(${featuredProducts.length}, minmax(0, 1fr))` }
-                  : undefined
+              className={
+                featuredProducts.length === 1
+                  ? "mx-auto mt-5 max-w-sm sm:mt-8"
+                  : "mt-5 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mt-8 sm:gap-4 sm:overflow-visible [&::-webkit-scrollbar]:hidden"
               }
             >
               {featuredProducts.map((product) => (
@@ -234,7 +231,11 @@ export function LandingPageView({
                   href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-colors hover:border-cat4-blue/50"
+                  className={
+                    featuredProducts.length === 1
+                      ? "group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-colors hover:border-cat4-blue/50"
+                      : "group flex w-[10.5rem] shrink-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-colors hover:border-cat4-blue/50 sm:w-auto sm:min-w-0 sm:flex-1"
+                  }
                 >
                   <div className="relative aspect-square bg-cat4-surface/50">
                     {product.imageUrl ? (
