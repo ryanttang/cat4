@@ -112,6 +112,7 @@ export const PROMOTION_TYPE_LABELS: Record<string, string> = {
   raffle: "Raffle",
   giveaway: "Giveaway",
   contest: "Contest",
+  promotion: "Promotion",
 };
 
 export function isPromotionActive(page: LandingPage): boolean {

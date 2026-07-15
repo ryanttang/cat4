@@ -29,7 +29,7 @@ export function LandingPagesAdmin({ pages, entryCounts }: LandingPagesAdminProps
     <>
       <AdminPageHeader
         title="Promotions"
-        description="Manage sweepstakes, raffles, giveaways, and contests."
+        description="Manage sweepstakes, raffles, giveaways, contests, and promotions."
       >
         <Button type="button" onClick={dialog.openCreate}>
           <Plus className="mr-2 h-4 w-4" />

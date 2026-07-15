@@ -26,6 +26,7 @@ export const landingPageTypeEnum = pgEnum("landing_page_type", [
   "raffle",
   "giveaway",
   "contest",
+  "promotion",
 ]);
 export const contentStatusEnum = pgEnum("content_status", [
   "draft",

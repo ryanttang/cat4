@@ -103,7 +103,7 @@ export const aboutSectionSchema = z.object({
 export const landingPageSchema = z.object({
   title: z.string().min(1),
   slug: z.string().min(1),
-  type: z.enum(["sweepstakes", "raffle", "giveaway", "contest"]),
+  type: z.enum(["sweepstakes", "raffle", "giveaway", "contest", "promotion"]),
   status: z.enum(["draft", "published", "archived"]).optional(),
   blocks: z.record(z.unknown()).optional(),
   startsAt: z.string().optional().nullable(),

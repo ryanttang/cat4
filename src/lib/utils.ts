@@ -36,6 +36,7 @@ export const LANDING_PAGE_TYPES = [
   { value: "raffle", label: "Raffle" },
   { value: "giveaway", label: "Giveaway" },
   { value: "contest", label: "Contest" },
+  { value: "promotion", label: "Promotion" },
 ] as const;
 
 export const SURVEY_TYPES = [
