@@ -8,6 +8,9 @@ import { SectionLabel } from "@/components/marketing/section-label";
 import { PromotionCountdown } from "@/components/marketing/promotion-countdown";
 import { PromotionPasswordGate } from "@/components/marketing/promotion-password-gate";
 import {
+  getHowItWorksFromBlocks,
+  getKeyDetailsFromBlocks,
+  getLandingPagePrizes,
   getPromotionSettings,
   isPromotionActive,
   PROMOTION_TYPE_LABELS,
@@ -21,23 +24,7 @@ type LandingPageViewProps = {
   previewVideoAutoplay?: boolean;
 };
 
-const HOW_IT_WORKS = [
-  {
-    icon: Sparkles,
-    title: "Join the promotion",
-    description: "Click Join Now and complete our quick entry wizard.",
-  },
-  {
-    icon: Gift,
-    title: "Submit your entry",
-    description: "Tell us a bit about yourself — it only takes a minute.",
-  },
-  {
-    icon: Trophy,
-    title: "Win big",
-    description: "One lucky winner will be selected when the promotion ends.",
-  },
-];
+const HOW_IT_WORKS_ICONS = [Sparkles, Gift, Trophy] as const;
 
 export function LandingPageView({
   page,
@@ -46,6 +33,9 @@ export function LandingPageView({
 }: LandingPageViewProps) {
   const blocks = page.blocks as LandingPageBlock;
   const settings = getPromotionSettings(blocks);
+  const prizes = getLandingPagePrizes(blocks);
+  const howItWorks = getHowItWorksFromBlocks(blocks);
+  const keyDetails = getKeyDetailsFromBlocks(blocks);
   const active = preview || isPromotionActive(page);
   const entryPath = promotionEntryPath(page.slug);
   const heroAutoplay = preview ? previewVideoAutoplay : true;
@@ -96,34 +86,80 @@ export function LandingPageView({
       </section>
 
       <div className="mx-auto max-w-4xl px-4 py-16">
-        {blocks.prize && (
-          <div className="mb-12 rounded-xl border border-cat4-blue/40 bg-cat4-blue/15 p-8 text-center">
-            <SectionLabel>Grand Prize</SectionLabel>
-            <h2 className="mt-2 text-2xl font-bold text-cat4-light sm:text-3xl">{blocks.prize.title}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-cat4-light/80">{blocks.prize.description}</p>
-            {active && (
-              <Button asChild size="lg" className="mt-6">
-                <Link href={entryPath}>Join Now</Link>
-              </Button>
-            )}
+        {prizes.length > 0 && (
+          <div className="mb-12 space-y-6">
+            {prizes.map((prize, index) => (
+              <div
+                key={`${prize.title}-${index}`}
+                className="rounded-xl border border-cat4-blue/40 bg-cat4-blue/15 p-8 text-center"
+              >
+                <SectionLabel>{prize.label ?? (index === 0 ? "Grand Prize" : "Prize")}</SectionLabel>
+                {prize.imageUrl && (
+                  <div className="mx-auto mt-4 max-w-xs overflow-hidden rounded-lg">
+                    <img
+                      src={prize.imageUrl}
+                      alt={prize.title}
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                )}
+                <h2 className="mt-2 text-2xl font-bold text-cat4-light sm:text-3xl">{prize.title}</h2>
+                <p className="mx-auto mt-3 max-w-xl text-cat4-light/80">{prize.description}</p>
+                {active && index === prizes.length - 1 && (
+                  <Button asChild size="lg" className="mt-6">
+                    <Link href={entryPath}>Join Now</Link>
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {keyDetails && (
+          <div className="mb-12 rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+            <h2 className="text-center text-2xl font-bold text-cat4-light">{keyDetails.title}</h2>
+            <dl className="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-6">
+              {keyDetails.items.map(({ label, value }) => (
+                <div
+                  key={label}
+                  className="rounded-lg border border-white/10 bg-cat4-dark/40 p-4"
+                >
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-cat4-blue">
+                    {label}
+                  </dt>
+                  <dd className="mt-2 whitespace-pre-wrap text-sm text-cat4-light/80">{value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         )}
 
         <div className="mb-12">
-          <h2 className="text-center text-2xl font-bold text-cat4-light">How It Works</h2>
-          <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-6">
-            {HOW_IT_WORKS.map(({ icon: Icon, title, description }) => (
-              <div
-                key={title}
-                className="rounded-xl border border-white/10 bg-white/5 p-3 text-center sm:p-6"
-              >
-                <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-cat4-blue/20 text-cat4-blue sm:h-12 sm:w-12">
-                  <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+          <h2 className="text-center text-2xl font-bold text-cat4-light">{howItWorks.title}</h2>
+          <div
+            className={`mt-8 grid gap-2 sm:gap-6 ${
+              howItWorks.steps.length === 1
+                ? "grid-cols-1"
+                : howItWorks.steps.length === 2
+                  ? "grid-cols-2"
+                  : "grid-cols-3"
+            }`}
+          >
+            {howItWorks.steps.map(({ title, description }, index) => {
+              const Icon = HOW_IT_WORKS_ICONS[index % HOW_IT_WORKS_ICONS.length];
+              return (
+                <div
+                  key={`${title}-${index}`}
+                  className="rounded-xl border border-white/10 bg-white/5 p-3 text-center sm:p-6"
+                >
+                  <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-cat4-blue/20 text-cat4-blue sm:h-12 sm:w-12">
+                    <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+                  </div>
+                  <h3 className="mt-2 text-xs font-semibold text-cat4-light sm:mt-4 sm:text-base">{title}</h3>
+                  <p className="mt-1 hidden text-sm text-cat4-light/70 sm:mt-2 sm:block">{description}</p>
                 </div>
-                <h3 className="mt-2 text-xs font-semibold text-cat4-light sm:mt-4 sm:text-base">{title}</h3>
-                <p className="mt-1 hidden text-sm text-cat4-light/70 sm:mt-2 sm:block">{description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

@@ -15,7 +15,21 @@ import { createLandingPage, updateLandingPage, deleteLandingPage } from "@/lib/a
 import { LANDING_PAGE_TYPES, slugify } from "@/lib/utils";
 import { sweepstakesTemplateBlocks } from "@/lib/mock/sweepstakes-seed";
 import { DEFAULT_HERO_YOUTUBE_URL } from "@/lib/hero-video";
-import type { LandingPage, LandingPageBlock, LandingPageFeaturedProduct } from "@/lib/db/schema";
+import {
+  DEFAULT_HOW_IT_WORKS_STEPS,
+  DEFAULT_HOW_IT_WORKS_TITLE,
+  DEFAULT_KEY_DETAILS_TITLE,
+  getHowItWorksFromBlocks,
+  getLandingPagePrizes,
+  normalizeKeyDetails,
+} from "@/lib/promotion-utils";
+import type {
+  LandingPage,
+  LandingPageBlock,
+  LandingPageFeaturedProduct,
+  LandingPageHowItWorksStep,
+  LandingPagePrizeBlock,
+} from "@/lib/db/schema";
 import { ChevronLeft, Plus, Sparkles, Trash2 } from "lucide-react";
 import { adminPanelClass } from "@/components/admin/admin-ui";
 import type { AdminDialogFormProps } from "@/components/admin/admin-form-dialog";
@@ -25,6 +39,18 @@ const emptyFeaturedProduct = (): LandingPageFeaturedProduct => ({
   url: "",
   description: "",
   imageUrl: "",
+});
+
+const emptyPrize = (): LandingPagePrizeBlock => ({
+  label: "",
+  title: "",
+  description: "",
+  imageUrl: "",
+});
+
+const emptyHowItWorksStep = (): LandingPageHowItWorksStep => ({
+  title: "",
+  description: "",
 });
 
 function normalizeFeaturedProducts(
@@ -40,6 +66,38 @@ function normalizeFeaturedProducts(
     .filter((item) => item.name && item.url);
 
   return cleaned.length > 0 ? cleaned : undefined;
+}
+
+function normalizePrizes(items: LandingPagePrizeBlock[]): LandingPagePrizeBlock[] | undefined {
+  const cleaned = items
+    .map((item) => ({
+      label: item.label?.trim() || undefined,
+      title: item.title.trim(),
+      description: item.description.trim(),
+      imageUrl: item.imageUrl?.trim() || undefined,
+    }))
+    .filter((item) => item.title);
+
+  return cleaned.length > 0 ? cleaned : undefined;
+}
+
+function normalizeHowItWorksSteps(
+  title: string,
+  steps: LandingPageHowItWorksStep[]
+): LandingPageBlock["howItWorks"] | undefined {
+  const cleanedSteps = steps
+    .map((step) => ({
+      title: step.title.trim(),
+      description: step.description.trim(),
+    }))
+    .filter((step) => step.title);
+
+  if (cleanedSteps.length === 0) return undefined;
+
+  return {
+    title: title.trim() || undefined,
+    steps: cleanedSteps,
+  };
 }
 
 export function LandingPageForm({
@@ -59,8 +117,26 @@ export function LandingPageForm({
   const [videoUrl, setVideoUrl] = useState(blocks.hero?.videoUrl ?? "");
   const [previewVideoAutoplay, setPreviewVideoAutoplay] = useState(false);
   const [imageUrl, setImageUrl] = useState(blocks.hero?.imageUrl ?? "");
-  const [prizeTitle, setPrizeTitle] = useState(blocks.prize?.title ?? "");
-  const [prizeDesc, setPrizeDesc] = useState(blocks.prize?.description ?? "");
+  const [prizes, setPrizes] = useState<LandingPagePrizeBlock[]>(() => {
+    const existing = getLandingPagePrizes(blocks);
+    return existing.length > 0 ? existing : [];
+  });
+  const [howItWorksTitle, setHowItWorksTitle] = useState(
+    () => getHowItWorksFromBlocks(blocks).title
+  );
+  const [howItWorksSteps, setHowItWorksSteps] = useState<LandingPageHowItWorksStep[]>(() => {
+    const existing = blocks.howItWorks?.steps?.filter((step) => step.title?.trim());
+    return existing?.length
+      ? existing.map((step) => ({ ...step }))
+      : DEFAULT_HOW_IT_WORKS_STEPS.map((step) => ({ ...step }));
+  });
+  const [keyDetailsTitle, setKeyDetailsTitle] = useState(
+    blocks.keyDetails?.title ?? DEFAULT_KEY_DETAILS_TITLE
+  );
+  const [promotionPeriod, setPromotionPeriod] = useState(blocks.keyDetails?.promotionPeriod ?? "");
+  const [eligibleProducts, setEligibleProducts] = useState(blocks.keyDetails?.eligibleProducts ?? "");
+  const [purchaseLimits, setPurchaseLimits] = useState(blocks.keyDetails?.purchaseLimits ?? "");
+  const [redemptionWindow, setRedemptionWindow] = useState(blocks.keyDetails?.redemptionWindow ?? "");
   const [featuredProducts, setFeaturedProducts] = useState<LandingPageFeaturedProduct[]>(
     blocks.featuredProducts?.length ? blocks.featuredProducts : []
   );
@@ -81,6 +157,22 @@ export function LandingPageForm({
     patch: Partial<LandingPageFeaturedProduct>
   ) {
     setFeaturedProducts((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...patch };
+      return next;
+    });
+  }
+
+  function updatePrize(index: number, patch: Partial<LandingPagePrizeBlock>) {
+    setPrizes((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...patch };
+      return next;
+    });
+  }
+
+  function updateHowItWorksStep(index: number, patch: Partial<LandingPageHowItWorksStep>) {
+    setHowItWorksSteps((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], ...patch };
       return next;
@@ -109,7 +201,15 @@ export function LandingPageForm({
         consentText,
       },
       rules: { content: rules },
-      prize: prizeTitle ? { title: prizeTitle, description: prizeDesc } : undefined,
+      prizes: normalizePrizes(prizes),
+      howItWorks: normalizeHowItWorksSteps(howItWorksTitle, howItWorksSteps),
+      keyDetails: normalizeKeyDetails({
+        title: keyDetailsTitle,
+        promotionPeriod,
+        eligibleProducts,
+        purchaseLimits,
+        redemptionWindow,
+      }),
       featuredProducts: normalizeFeaturedProducts(featuredProducts),
     };
   }
@@ -133,8 +233,14 @@ export function LandingPageForm({
       subheadline,
       videoUrl,
       imageUrl,
-      prizeTitle,
-      prizeDesc,
+      prizes,
+      howItWorksTitle,
+      howItWorksSteps,
+      keyDetailsTitle,
+      promotionPeriod,
+      eligibleProducts,
+      purchaseLimits,
+      redemptionWindow,
       featuredProducts,
       rules,
       consentText,
@@ -152,8 +258,18 @@ export function LandingPageForm({
     setHeadline(template.hero?.headline ?? "");
     setSubheadline(template.hero?.subheadline ?? "");
     setVideoUrl(template.hero?.videoUrl ?? DEFAULT_HERO_YOUTUBE_URL);
-    setPrizeTitle(template.prize?.title ?? "");
-    setPrizeDesc(template.prize?.description ?? "");
+    setPrizes(getLandingPagePrizes(template));
+    setHowItWorksTitle(getHowItWorksFromBlocks(template).title);
+    setHowItWorksSteps(
+      template.howItWorks?.steps?.length
+        ? template.howItWorks.steps.map((step) => ({ ...step }))
+        : DEFAULT_HOW_IT_WORKS_STEPS.map((step) => ({ ...step }))
+    );
+    setKeyDetailsTitle(template.keyDetails?.title ?? DEFAULT_KEY_DETAILS_TITLE);
+    setPromotionPeriod(template.keyDetails?.promotionPeriod ?? "");
+    setEligibleProducts(template.keyDetails?.eligibleProducts ?? "");
+    setPurchaseLimits(template.keyDetails?.purchaseLimits ?? "");
+    setRedemptionWindow(template.keyDetails?.redemptionWindow ?? "");
     setFeaturedProducts(template.featuredProducts?.length ? template.featuredProducts : []);
     setRules(template.rules?.content ?? "");
     setConsentText(template.form?.consentText ?? consentText);
@@ -330,15 +446,192 @@ export function LandingPageForm({
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>
-        <h3 className="font-semibold">Prize Block (optional)</h3>
         <div>
-          <Label>Prize Title</Label>
-          <Input value={prizeTitle} onChange={(e) => setPrizeTitle(e.target.value)} className="mt-1" />
+          <h3 className="font-semibold">Prize Blocks (optional)</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Add one or more prizes to highlight on the promotion page.
+          </p>
+        </div>
+        {prizes.map((prize, index) => (
+          <div key={index} className="space-y-3 rounded-lg border border-border p-3">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Prize {index + 1}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setPrizes((prev) => prev.filter((_, i) => i !== index))}
+                aria-label={`Remove prize ${index + 1}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div>
+              <Label>Label (optional)</Label>
+              <Input
+                value={prize.label ?? ""}
+                onChange={(e) => updatePrize(index, { label: e.target.value })}
+                placeholder={index === 0 ? "Grand Prize" : "Prize"}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Prize Title</Label>
+              <Input
+                value={prize.title}
+                onChange={(e) => updatePrize(index, { title: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Prize Description</Label>
+              <Textarea
+                value={prize.description}
+                onChange={(e) => updatePrize(index, { description: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Image URL (optional)</Label>
+              <Input
+                type="url"
+                value={prize.imageUrl ?? ""}
+                onChange={(e) => updatePrize(index, { imageUrl: e.target.value })}
+                placeholder="https://"
+                className="mt-1"
+              />
+            </div>
+            <FileUpload
+              label="Prize Image (upload)"
+              accept="image/*"
+              value={prize.imageUrl}
+              onChange={(url) => updatePrize(index, { imageUrl: url })}
+            />
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setPrizes((prev) => [...prev, emptyPrize()])}
+        >
+          <Plus className="mr-1 h-4 w-4" />
+          Add Prize
+        </Button>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <div>
+          <h3 className="font-semibold">Key Details (optional)</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Highlight promotion terms visitors should know at a glance.
+          </p>
         </div>
         <div>
-          <Label>Prize Description</Label>
-          <Textarea value={prizeDesc} onChange={(e) => setPrizeDesc(e.target.value)} className="mt-1" />
+          <Label>Section Title</Label>
+          <Input
+            value={keyDetailsTitle}
+            onChange={(e) => setKeyDetailsTitle(e.target.value)}
+            placeholder={DEFAULT_KEY_DETAILS_TITLE}
+            className="mt-1"
+          />
         </div>
+        <div>
+          <Label>Promotion Period</Label>
+          <Textarea
+            value={promotionPeriod}
+            onChange={(e) => setPromotionPeriod(e.target.value)}
+            placeholder="e.g. January 1 – March 31, 2026"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Eligible Products</Label>
+          <Textarea
+            value={eligibleProducts}
+            onChange={(e) => setEligibleProducts(e.target.value)}
+            placeholder="e.g. All CAT4 cartridges and flower products"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Purchase Limits</Label>
+          <Textarea
+            value={purchaseLimits}
+            onChange={(e) => setPurchaseLimits(e.target.value)}
+            placeholder="e.g. One entry per household per day"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Redemption Window</Label>
+          <Textarea
+            value={redemptionWindow}
+            onChange={(e) => setRedemptionWindow(e.target.value)}
+            placeholder="e.g. Winners must claim prizes within 30 days of notification"
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      <div className={`space-y-4 p-4 ${adminPanelClass}`}>
+        <div>
+          <h3 className="font-semibold">How It Works</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Customize the steps shown on the promotion landing page.
+          </p>
+        </div>
+        <div>
+          <Label>Section Title</Label>
+          <Input
+            value={howItWorksTitle}
+            onChange={(e) => setHowItWorksTitle(e.target.value)}
+            placeholder={DEFAULT_HOW_IT_WORKS_TITLE}
+            className="mt-1"
+          />
+        </div>
+        {howItWorksSteps.map((step, index) => (
+          <div key={index} className="space-y-3 rounded-lg border border-border p-3">
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Step {index + 1}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setHowItWorksSteps((prev) => prev.filter((_, i) => i !== index))}
+                aria-label={`Remove step ${index + 1}`}
+                disabled={howItWorksSteps.length <= 1}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div>
+              <Label>Step Title</Label>
+              <Input
+                value={step.title}
+                onChange={(e) => updateHowItWorksStep(index, { title: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Step Description</Label>
+              <Textarea
+                value={step.description}
+                onChange={(e) => updateHowItWorksStep(index, { description: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setHowItWorksSteps((prev) => [...prev, emptyHowItWorksStep()])}
+        >
+          <Plus className="mr-1 h-4 w-4" />
+          Add Step
+        </Button>
       </div>
 
       <div className={`space-y-4 p-4 ${adminPanelClass}`}>

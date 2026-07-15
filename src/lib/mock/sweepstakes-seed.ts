@@ -14,9 +14,47 @@ export const MOCK_SWEEPSTAKES_BLOCKS: LandingPageBlock = {
     videoUrl: DEFAULT_HERO_YOUTUBE_URL,
   },
   prize: {
+    label: "Grand Prize",
     title: "Grand Prize — $2,000+ Value",
     description:
       "One winner receives a full year of CAT4 products including cartridges, flower, extracts, and exclusive merch.",
+  },
+  prizes: [
+    {
+      label: "Grand Prize",
+      title: "Grand Prize — $2,000+ Value",
+      description:
+        "One winner receives a full year of CAT4 products including cartridges, flower, extracts, and exclusive merch.",
+    },
+    {
+      label: "Second Prize",
+      title: "Runner-Up Prize Pack",
+      description: "Five winners receive a curated CAT4 product bundle valued at $200+ MSRP.",
+    },
+  ],
+  howItWorks: {
+    title: "How It Works",
+    steps: [
+      {
+        title: "Join the promotion",
+        description: "Click Join Now and complete our quick entry wizard.",
+      },
+      {
+        title: "Submit your entry",
+        description: "Tell us a bit about yourself — it only takes a minute.",
+      },
+      {
+        title: "Win big",
+        description: "Winners will be selected when the promotion ends.",
+      },
+    ],
+  },
+  keyDetails: {
+    title: "Key Details",
+    promotionPeriod: "January 1, 2026 through December 31, 2026",
+    eligibleProducts: "All CAT4 cartridges, flower, and extract products purchased from participating retailers.",
+    purchaseLimits: "Limit one entry per person per day. No purchase necessary to enter.",
+    redemptionWindow: "Winners must respond within 14 days and claim prizes within 30 days of notification.",
   },
   form: {
     fields: [

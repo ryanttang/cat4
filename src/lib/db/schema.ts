@@ -238,6 +238,27 @@ export type LandingPageFeaturedProduct = {
   imageUrl?: string;
 };
 
+export type LandingPagePrizeBlock = {
+  /** Short label above the prize title, e.g. "Grand Prize". */
+  label?: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+};
+
+export type LandingPageHowItWorksStep = {
+  title: string;
+  description: string;
+};
+
+export type LandingPageKeyDetails = {
+  title?: string;
+  promotionPeriod?: string;
+  eligibleProducts?: string;
+  purchaseLimits?: string;
+  redemptionWindow?: string;
+};
+
 export type LandingPageBlock = {
   settings?: {
     passwordProtected?: boolean;
@@ -255,7 +276,14 @@ export type LandingPageBlock = {
     consentText: string;
   };
   rules?: { content: string };
-  prize?: { title: string; description: string; imageUrl?: string };
+  /** @deprecated Prefer `prizes`. Kept for backward compatibility with older saved blocks. */
+  prize?: LandingPagePrizeBlock;
+  prizes?: LandingPagePrizeBlock[];
+  howItWorks?: {
+    title?: string;
+    steps: LandingPageHowItWorksStep[];
+  };
+  keyDetails?: LandingPageKeyDetails;
   /** External product links shown on the promotion landing page. */
   featuredProducts?: LandingPageFeaturedProduct[];
 };
