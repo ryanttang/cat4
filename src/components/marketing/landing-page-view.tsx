@@ -71,14 +71,16 @@ export function LandingPageView({
           <span className="rounded-full bg-cat4-blue/30 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-cat4-light">
             {PROMOTION_TYPE_LABELS[page.type] ?? page.type}
           </span>
-          <h1 className="mt-3 max-w-3xl text-3xl font-bold leading-tight text-cat4-light sm:mt-4 sm:text-5xl lg:text-6xl">
-            {blocks.hero?.headline ?? page.title}
-          </h1>
-          {blocks.hero?.subheadline && (
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-cat4-light/90 sm:mt-4 sm:text-lg">
-              {blocks.hero.subheadline}
-            </p>
-          )}
+          <div className="mt-4 w-full max-w-3xl rounded-2xl border border-white/15 bg-black/50 px-5 py-5 shadow-lg backdrop-blur-md sm:mt-5 sm:px-8 sm:py-7">
+            <h1 className="text-3xl font-bold leading-tight text-cat4-light sm:text-5xl lg:text-6xl">
+              {blocks.hero?.headline ?? page.title}
+            </h1>
+            {blocks.hero?.subheadline && (
+              <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-cat4-light/90 sm:mt-4 sm:text-lg">
+                {blocks.hero.subheadline}
+              </p>
+            )}
+          </div>
           {settings.countdownEnabled && <PromotionCountdown endsAt={page.endsAt} />}
 
           {showCta &&
