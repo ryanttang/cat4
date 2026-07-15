@@ -120,14 +120,14 @@ export function LandingPageView({
                       />
                     </div>
                   ) : null}
-                  <div className="flex flex-1 flex-col p-3 sm:p-5 lg:p-6">
+                  <div className="flex flex-1 flex-col p-2.5 sm:p-5 lg:p-6">
                     <SectionLabel className="self-center px-2 py-0.5 text-[10px] tracking-wide sm:px-3 sm:py-1 sm:text-xs sm:tracking-wider">
                       {prize.label ?? (index === 0 ? "Grand Prize" : "Prize")}
                     </SectionLabel>
                     <h2 className="mt-1.5 text-sm font-bold leading-snug text-cat4-light sm:mt-2 sm:text-xl lg:text-2xl">
                       {prize.title}
                     </h2>
-                    <p className="mt-1.5 flex-1 text-xs leading-relaxed text-cat4-light/80 sm:mt-2 sm:text-sm">
+                    <p className="mt-1 flex-1 text-[10px] leading-snug text-cat4-light/80 sm:mt-2 sm:text-xs sm:leading-relaxed md:text-sm">
                       {prize.description}
                     </p>
                   </div>
@@ -157,12 +157,12 @@ export function LandingPageView({
               {keyDetails.items.map(({ label, value }) => (
                 <div
                   key={label}
-                  className="rounded-lg border border-white/10 bg-cat4-dark/40 p-3 sm:p-4"
+                  className="rounded-lg border border-white/10 bg-cat4-dark/40 p-2.5 sm:p-4"
                 >
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-cat4-blue sm:text-xs">
+                  <dt className="text-[9px] font-semibold uppercase tracking-wide text-cat4-blue sm:text-xs sm:tracking-wider">
                     {label}
                   </dt>
-                  <dd className="mt-1.5 whitespace-pre-wrap text-xs leading-relaxed text-cat4-light/80 sm:mt-2 sm:text-sm">
+                  <dd className="mt-1 whitespace-pre-wrap text-[10px] leading-snug text-cat4-light/80 sm:mt-2 sm:text-xs sm:leading-relaxed md:text-sm">
                     {value}
                   </dd>
                 </div>
@@ -198,7 +198,7 @@ export function LandingPageView({
                     <h3 className="mt-2 text-xs font-semibold leading-snug text-cat4-light sm:mt-4 sm:text-base">
                       {title}
                     </h3>
-                    <p className="mt-1 text-[11px] leading-relaxed text-cat4-light/70 sm:mt-2 sm:text-sm">
+                    <p className="mt-1 text-[10px] leading-snug text-cat4-light/70 sm:mt-2 sm:text-xs sm:leading-relaxed md:text-sm">
                       {description}
                     </p>
                   </div>
@@ -246,16 +246,16 @@ export function LandingPageView({
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col p-3 sm:p-4">
+                  <div className="flex flex-1 flex-col p-2.5 sm:p-4">
                     <h3 className="text-sm font-semibold leading-snug text-cat4-light group-hover:text-cat4-blue sm:text-base">
                       {product.name}
                     </h3>
                     {product.description && (
-                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-cat4-light/60 sm:text-sm">
+                      <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-cat4-light/60 sm:text-xs sm:leading-relaxed md:text-sm">
                         {product.description}
                       </p>
                     )}
-                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-cat4-blue sm:mt-3 sm:text-sm">
+                    <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-cat4-blue sm:mt-3 sm:text-sm">
                       View product
                       <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     </span>
