@@ -27,7 +27,19 @@ Do not fork platform logic per brand. Fork the repo (or a clean template branch)
 
 Keep `brand.colors` hex values in sync with Tailwind when you change them.
 
-## Clone playbook
+## Clone playbook (wizard)
+
+Preferred: run the interactive wizard from this repo:
+
+```bash
+npm run brand:clone
+```
+
+It copies the tree to a new directory, writes `src/lib/brand.ts`, patches Tailwind hex (keeps `cat4-*` class names for mergeable sync), updates `package.json` name, and writes `.brand/lineage.json` + `.brand/CLONE_CHECKLIST.md`.
+
+Docs for sync/pull/push: [`.brand/README.md`](../../../.brand/README.md).
+
+### Manual checklist (if not using the wizard)
 
 ```
 - [ ] Clone repo / create brand branch
@@ -40,8 +52,26 @@ Keep `brand.colors` hex values in sync with Tailwind when you change them.
 - [ ] New .env: AUTH_*, DATABASE_URL, BLOB_*, SEED_ADMIN_*
 - [ ] package.json name → new brand slug (optional)
 - [ ] Fresh Neon + Vercel project; db:push / migrate + db:seed
-- [ ] Grep for old brand string and cat4- storage leftovers
+- [ ] npm run brand:doctor — clear leftover source-brand strings
 ```
+
+## Syncing features between platform and clones
+
+Path split lives in `.brand/paths.json` (**platform** vs **skin**).
+
+```bash
+# In a clone — preview then pull platform updates from CAT4
+npm run brand:sync -- pull --from ../CAT4 --dry-run
+npm run brand:sync -- pull --from ../CAT4
+
+# Port a feature built on a clone back into the platform
+npm run brand:sync -- push --to ../CAT4 --path src/lib/data/surveys.ts
+
+# See drift both ways
+npm run brand:diff -- --peer ../acme
+```
+
+Skin files (`brand.ts`, seeds, `public/`, homepage defaults, theme hex) are never overwritten by sync unless you pass `--include-skin`.
 
 ## What not to do
 
@@ -54,11 +84,12 @@ Keep `brand.colors` hex values in sync with Tailwind when you change them.
 
 | Item | Location | Guidance |
 |------|----------|----------|
-| Tailwind namespace `cat4.*` | `tailwind.config.ts`, classnames | Rename to `brand.*` when ready |
+| Tailwind namespace `cat4.*` | `tailwind.config.ts`, classnames | Keep names for sync; change hex only (or rename to `brand.*` when ready) |
 | Homepage field `whatIsCat4` | `lib/homepage.ts` | Rename to brand-agnostic key before multi-brand template |
-| Mock/seed prose | `lib/mock/*`, `lib/homepage.ts` defaults | Replace per brand |
+| Hardcoded `"CAT4"` in UI | marketing/admin components | Use `brand.name` / `brand.defaults`; find with `npm run brand:doctor` |
+| Mock/seed prose | `lib/mock/*`, `lib/homepage.ts` defaults | Replace per brand (wizard soft-replaces many) |
 | Product import script | `scripts/import-catalyst-products.mjs` | Swap for brand-specific importer |
-| README / package name | root | Update on clone |
+| README / package name | root | Updated by clone wizard |
 
 ## Scalability model for many brands
 
@@ -69,11 +100,13 @@ platform repo (this codebase)
     └── deploy: …
 ```
 
-Share improvements by merging platform PRs into each brand fork, or extract a private template repo once the skin boundary is stable.
+Share improvements with `npm run brand:sync` (path-filtered copy of platform files), git remotes (`platform` upstream), or PR merges into each brand fork.
 
 ## Agent rules
 
+- When the user asks to **clone**, **rebrand**, **white-label**, or **sync/migrate** features across brands: read [`.brand/README.md`](../../../.brand/README.md) and use `npm run brand:clone` / `brand:sync` (see `.cursor/rules/brand-clone-sync.mdc`). Do not hand-copy the repo.
 - When adding user-visible default strings that mention the brand, add them to `brand.defaults` (or read `brand.name`).
 - When adding browser storage keys, namespace with `brand.id`.
 - Prefer generic domain names in schema (`brand_ambassadors` is fine as a domain term; do not add `cat4_` table prefixes).
+- When adding shared platform code, keep it under a **platform** path in `.brand/paths.json` (or update that file).
 - Treat white-label readiness as a review criterion for architecture changes — see [modularity.md](modularity.md).

@@ -20,6 +20,8 @@ Then open only what you need:
 - `white-label.md` — platform vs skin, clone playbook
 - `extending.md` — worked examples
 
+**Clone / sync / migrate brands:** also read **`.brand/README.md`** and follow [`.cursor/rules/brand-clone-sync.mdc`](brand-clone-sync.mdc). Use `npm run brand:clone` / `brand:sync` — do not manually fork-copy.
+
 ## Hard rules
 
 1. **Brand SSOT:** `src/lib/brand.ts` — no new hardcoded `"CAT4"` chrome/consent/metadata
@@ -30,6 +32,6 @@ Then open only what you need:
 6. **No new global client state** — RSC + actions + local state
 7. **Polls share `surveys`** — do not add a polls table
 8. **Homepage JSON ≠ hero_blocks**
-9. **White-label:** clone + `brand.ts` + theme + seeds; do not add `brandId` tenancy for a rebrand
+9. **White-label:** `npm run brand:clone` + skin swap; sync with `npm run brand:sync`. Do not add `brandId` tenancy for a rebrand
 
 If README conflicts with schema/code, trust schema/code and update docs when asked.

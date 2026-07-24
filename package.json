@@ -16,7 +16,12 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/lib/db/seed.ts",
-    "import:products": "node scripts/import-catalyst-products.mjs"
+    "import:products": "node scripts/import-catalyst-products.mjs",
+    "brand:clone": "node scripts/brand-cli.mjs clone",
+    "brand:sync": "node scripts/brand-cli.mjs sync",
+    "brand:diff": "node scripts/brand-cli.mjs diff",
+    "brand:status": "node scripts/brand-cli.mjs status",
+    "brand:doctor": "node scripts/brand-cli.mjs doctor"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",

@@ -3,8 +3,10 @@ name: cat4-platform
 description: >-
   CAT4 brand platform architecture, white-label cloning, modularity, and coding
   conventions. Use when building features, refactoring, reviewing PRs, adding
-  domains, cloning/white-labeling for another brand, touching schema/data/actions,
-  or when the user asks how this platform is built or should be built.
+  domains, cloning/white-labeling/rebranding for another brand, syncing or
+  migrating platform updates between CAT4 and a clone (brand:clone, brand:sync,
+  brand:diff, brand:doctor), or when the user asks how this platform is built
+  or should be built.
 ---
 
 # CAT4 Platform
@@ -13,7 +15,24 @@ Reusable **single-brand** cannabis brand platform (reference deploy: CAT4): publ
 
 **Stack:** Next.js 15 App Router · React 19 · TypeScript · Tailwind · Neon Postgres · Drizzle · Auth.js v5 · Zod · Vercel Blob · Vitest
 
-**White-label model:** clone repo → swap `src/lib/brand.ts` + theme + seeds → new Neon/Vercel. Not multi-tenant. Details: [white-label.md](white-label.md).
+**White-label model:** `npm run brand:clone` → skin (`brand.ts` + theme + seeds) → new Neon/Vercel. Sync features with `npm run brand:sync`. Not multi-tenant. Details: [white-label.md](white-label.md) · [`.brand/README.md`](../../../.brand/README.md).
+
+## Clone, sync & migrate (mandatory tooling)
+
+When the user asks to clone a brand, pull/push platform updates, or migrate features between deploys:
+
+1. Read [`.brand/README.md`](../../../.brand/README.md) and [white-label.md](white-label.md).
+2. Run the matching command (`brand:clone`, `brand:sync`, `brand:diff`, `brand:doctor`).
+3. Prefer `--dry-run` before applying sync; never overwrite skin unless asked.
+
+| Intent | Command |
+|--------|---------|
+| New brand | `npm run brand:clone` |
+| Clone ← platform | `npm run brand:sync -- pull --from <peer>` |
+| Clone → platform | `npm run brand:sync -- push --to <peer>` |
+| Drift | `npm run brand:diff -- --peer <peer>` |
+
+Path split SSOT: `.brand/paths.json`. Cursor rule: `.cursor/rules/brand-clone-sync.mdc`.
 
 ## Read this first
 
@@ -26,6 +45,7 @@ Reusable **single-brand** cannabis brand platform (reference deploy: CAT4): publ
    - [domain-map.md](domain-map.md) — domains, routes, UI label ↔ code name map
    - [white-label.md](white-label.md) — platform vs skin, clone playbook
    - [extending.md](extending.md) — worked examples for new fields/domains
+   - [`.brand/README.md`](../../../.brand/README.md) — clone wizard + bidirectional sync
 
 ## Source of truth (priority order)
 
@@ -42,6 +62,7 @@ Reusable **single-brand** cannabis brand platform (reference deploy: CAT4): publ
 | Homepage CMS JSON | `src/lib/homepage.ts` + `site_settings` key `"homepage"` |
 | Theme tokens | `tailwind.config.ts` (`cat4.*`) — keep hex in sync with `brand.colors` |
 | Env contract | `.env.example` |
+| Clone / sync tooling | `.brand/README.md`, `.brand/paths.json`, `npm run brand:*` |
 | Ops / setup | `README.md` (may lag — prefer schema + code + this skill) |
 
 ## Layering (non-negotiable)
@@ -122,3 +143,6 @@ See [extending.md](extending.md) for worked examples.
 | Schema push / migrate | `npm run db:push` · `db:generate` · `db:migrate` |
 | Seed | `npm run db:seed` |
 | Regenerate product mock seed | `npm run import:products` |
+| White-label clone wizard | `npm run brand:clone` |
+| Sync platform ↔ clone | `npm run brand:sync -- pull\|push --from\|--to <peer>` |
+| Platform drift / leftover brand strings | `npm run brand:diff` · `npm run brand:doctor` |

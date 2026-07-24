@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "role": "platform",
+  "brandId": "cat4",
+  "brandName": "CAT4",
+  "packageName": "cat4",
+  "createdAt": "2026-07-23T00:00:00.000Z",
+  "notes": "Reference brand deploy. Clones should keep an upstream remote pointing here and sync via `npm run brand:sync`."
+}

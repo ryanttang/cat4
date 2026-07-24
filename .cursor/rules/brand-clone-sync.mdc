@@ -1,0 +1,30 @@
+---
+description: >-
+  Use when cloning/white-labeling a brand, syncing or migrating platform updates
+  between CAT4 and a clone (or vice versa), running brand:clone / brand:sync,
+  or when the user says clone, rebrand, white-label, or pull/push platform features.
+alwaysApply: true
+---
+
+# Brand clone & sync
+
+When the user asks to **clone**, **rebrand**, **white-label**, or **sync/migrate/update features** between this platform and another brand deploy:
+
+1. Read **`.brand/README.md`** first (path split + commands).
+2. Use the CLI — do not hand-copy the tree or invent a new tenancy model.
+
+| Intent | Command |
+|--------|---------|
+| New brand site | `npm run brand:clone` |
+| Pull platform updates into a clone | `npm run brand:sync -- pull --from <peer>` |
+| Port clone platform work upstream | `npm run brand:sync -- push --to <peer>` |
+| Preview drift | `npm run brand:diff -- --peer <peer>` |
+| Leftover brand strings | `npm run brand:doctor` |
+
+**Rules:**
+
+- Prefer `--dry-run` before applying sync.
+- Never overwrite **skin** (`brand.ts`, seeds, `public/`, theme hex) unless the user explicitly wants `--include-skin`.
+- Keep Tailwind class names `cat4-*` across clones; only change hex in `tailwind.config.ts` + `brand.colors`.
+- Path inventory SSOT: `.brand/paths.json`. Update it when adding new shared platform areas.
+- Lineage: `.brand/lineage.json`. Deeper playbook: `.cursor/skills/cat4-platform/white-label.md`.

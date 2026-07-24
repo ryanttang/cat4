@@ -18,8 +18,13 @@ References:
 | [domain-map.md](.cursor/skills/cat4-platform/domain-map.md) | Domain → files/routes |
 | [white-label.md](.cursor/skills/cat4-platform/white-label.md) | Cloning for another brand |
 | [extending.md](.cursor/skills/cat4-platform/extending.md) | Worked examples for new fields/domains |
+| [`.brand/README.md`](.brand/README.md) | **Clone wizard + sync/migrate between brands** |
 
-Always-on Cursor rule: [`.cursor/rules/cat4-platform.mdc`](.cursor/rules/cat4-platform.mdc)
+Always-on Cursor rules:
+
+- [`.cursor/rules/cat4-platform.mdc`](.cursor/rules/cat4-platform.mdc)
+- [`.cursor/rules/brand-clone-sync.mdc`](.cursor/rules/brand-clone-sync.mdc) — use whenever cloning or syncing brands
+
 
 ## One-line architecture
 
@@ -29,6 +34,14 @@ Domain contract: `src/lib/db/schema.ts`. Brand skin: `src/lib/brand.ts`.
 ## White-label
 
 This is a **base build** meant to be cloned per brand (separate Neon + Vercel + `brand.ts`). Do not introduce multi-tenant `brandId` columns unless the product explicitly becomes multi-tenant.
+
+```bash
+npm run brand:clone                          # new brand deploy
+npm run brand:sync -- pull --from ../CAT4    # pull platform updates into a clone
+npm run brand:sync -- push --to ../CAT4      # port clone platform work upstream
+```
+
+Path split: `.brand/paths.json`. Workflow: `.brand/README.md`.
 
 ## Do not
 

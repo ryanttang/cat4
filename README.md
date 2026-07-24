@@ -2,7 +2,7 @@
 
 Reusable **single-brand** cannabis platform (reference deploy: **CAT4**) with public site, admin CMS, ambassador portal, promotions, surveys/polls, QR/rewards, analytics, and email capture — built on **Next.js 15**, **Neon PostgreSQL**, and **Vercel**.
 
-Clone and white-label for other brands by swapping [`src/lib/brand.ts`](src/lib/brand.ts), theme tokens, and seeds. See [`AGENTS.md`](AGENTS.md) and [`.cursor/skills/cat4-platform/white-label.md`](.cursor/skills/cat4-platform/white-label.md).
+Clone and white-label for other brands with the wizard (`npm run brand:clone`), then keep platform features in sync with `npm run brand:sync`. Details: [`.brand/README.md`](.brand/README.md), [`AGENTS.md`](AGENTS.md), [`.cursor/skills/cat4-platform/white-label.md`](.cursor/skills/cat4-platform/white-label.md).
 
 ## Brand Colors
 
@@ -211,6 +211,11 @@ Architecture, modularity, and agent conventions live in [`AGENTS.md`](AGENTS.md)
 | `npm run db:seed` | Seed sample data |
 | `npm run db:studio` | Open Drizzle Studio |
 | `npm run import:products` | Regenerate product mock seed from `data/` |
+| `npm run brand:clone` | Interactive white-label clone wizard |
+| `npm run brand:sync` | Pull/push platform paths between this repo and a peer |
+| `npm run brand:diff` | Show platform drift vs a peer |
+| `npm run brand:status` | Lineage + platform/skin inventory |
+| `npm run brand:doctor` | Find leftover hardcoded brand strings |
 
 ## Roles
 
