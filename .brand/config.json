@@ -1,0 +1,10 @@
+{
+  "clonesRoot": "/Users/ryantang/white-label",
+  "notes": "Default parent directory for npm run brand:clone. Each brand becomes <clonesRoot>/<brand-id>/.",
+  "cloneExclude": [
+    "data",
+    "public/products",
+    "scripts/import-catalyst-products.mjs",
+    "src/lib/mock/products-seed.ts"
+  ]
+}

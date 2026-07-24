@@ -1,15 +1,21 @@
 # Brand clone & sync
 
-This folder tracks **lineage** and the **platform vs skin** path split used by:
+This folder tracks **lineage**, clone destination config, and the **platform vs skin** path split used by:
 
 ```bash
 npm run brand:clone
-npm run brand:sync -- pull --from ../CAT4
-npm run brand:sync -- push --to ../other-brand
-npm run brand:diff -- --peer ../other-brand
+npm run brand:sync -- pull --from /Users/ryantang/Documents/programming/CAT4
+npm run brand:sync -- push --to /Users/ryantang/white-label/acme
+npm run brand:diff -- --peer /Users/ryantang/white-label/acme
 npm run brand:status
 npm run brand:doctor
 ```
+
+## Clones root
+
+New brands default to **`/Users/ryantang/white-label/<brand-id>/`** (configured in `.brand/config.json` → `clonesRoot`).
+
+Each clone is its own directory: `brand.ts`, `.env.local`, `npm install`, git init + `platform` remote — ready for `npm run dev`.
 
 ## Mental model
 
@@ -27,27 +33,27 @@ From the platform repo:
 
 ```bash
 npm run brand:clone
-# or non-interactive:
-npm run brand:clone -- --name "Acme" --id acme --dir ../acme --url https://acme.example.com --yes
+# or non-interactive (lands in /Users/ryantang/white-label/acme):
+npm run brand:clone -- --name "Acme" --id acme --url https://acme.example.com --yes
 ```
 
-The wizard copies the tree, writes `src/lib/brand.ts`, patches theme hex, sets `package.json` name, writes `.brand/lineage.json` + `CLONE_CHECKLIST.md`, and optionally `git init` with a `platform` remote.
+Override destination with `--dir` if needed. Use `--skip-install` to skip `npm install`.
+
+**Catalog:** clones do **not** copy CAT4 products (`data/`, `public/products/`, product seed). `MOCK_PRODUCTS` starts as `[]` — add products in Admin → Products.
 
 ## Pull platform updates into a clone
 
 ```bash
-cd ../acme
-npm run brand:sync -- pull --from ../CAT4 --dry-run   # preview
-npm run brand:sync -- pull --from ../CAT4             # apply (confirm)
+cd /Users/ryantang/white-label/acme
+npm run brand:sync -- pull --from /Users/ryantang/Documents/programming/CAT4 --dry-run
+npm run brand:sync -- pull --from /Users/ryantang/Documents/programming/CAT4
 ```
 
 ## Push a feature from a clone back to the platform
 
 ```bash
-cd ../acme
-npm run brand:sync -- push --to ../CAT4 --path src/lib/data/surveys.ts
-# or push all platform drift:
-npm run brand:sync -- push --to ../CAT4 --dry-run
+cd /Users/ryantang/white-label/acme
+npm run brand:sync -- push --to /Users/ryantang/Documents/programming/CAT4 --path src/lib/data/surveys.ts
 ```
 
 Prefer small `--path` ports for mixed work. After applying, run `npm test` / `npm run lint` in the destination and commit there.
@@ -62,6 +68,7 @@ Prefer small `--path` ports for mixed work. After applying, run `npm test` / `np
 
 | File | Purpose |
 |------|---------|
+| `config.json` | `clonesRoot` default parent for new brands |
 | `paths.json` | Platform / skin / never globs (synced as platform) |
 | `lineage.json` | Role, brand id, clone provenance (skin — not overwritten by sync) |
 | `CLONE_CHECKLIST.md` | Per-clone next steps (created by wizard) |

@@ -35,7 +35,7 @@ Preferred: run the interactive wizard from this repo:
 npm run brand:clone
 ```
 
-It copies the tree to a new directory, writes `src/lib/brand.ts`, patches Tailwind hex (keeps `cat4-*` class names for mergeable sync), updates `package.json` name, and writes `.brand/lineage.json` + `.brand/CLONE_CHECKLIST.md`.
+Clones land in **`/Users/ryantang/white-label/<brand-id>/`** by default (`.brand/config.json`). The wizard copies the tree, writes `src/lib/brand.ts`, patches Tailwind hex (keeps `cat4-*` class names for mergeable sync), creates `.env.local`, runs `npm install`, and writes lineage + checklist. **Product catalog starts empty** — source `data/` and `public/products` are not copied; add products via Admin → Products.
 
 Docs for sync/pull/push: [`.brand/README.md`](../../../.brand/README.md).
 

@@ -56,11 +56,13 @@ async function seed() {
   }
 
   const productCount = await db.select().from(products).limit(1);
-  if (productCount.length === 0) {
+  if (productCount.length === 0 && MOCK_PRODUCTS.length > 0) {
     await db.insert(products).values(
       MOCK_PRODUCTS.map(({ createdAt: _c, updatedAt: _u, ...product }) => product)
     );
-    console.log(`Seeded ${MOCK_PRODUCTS.length} CAT4 products (Bellflower pricing)`);
+    console.log(`Seeded ${MOCK_PRODUCTS.length} products`);
+  } else if (productCount.length === 0) {
+    console.log("No products to seed (catalog is empty — add via Admin → Products)");
   }
 
   const locationCount = await db.select().from(locations).limit(1);

@@ -19,6 +19,7 @@
     ".gitignore",
     ".cursor",
     ".brand/paths.json",
+    ".brand/config.json",
     ".brand/README.md",
     "scripts/brand",
     "scripts/brand-cli.mjs"

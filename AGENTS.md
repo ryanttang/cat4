@@ -36,12 +36,12 @@ Domain contract: `src/lib/db/schema.ts`. Brand skin: `src/lib/brand.ts`.
 This is a **base build** meant to be cloned per brand (separate Neon + Vercel + `brand.ts`). Do not introduce multi-tenant `brandId` columns unless the product explicitly becomes multi-tenant.
 
 ```bash
-npm run brand:clone                          # new brand deploy
-npm run brand:sync -- pull --from ../CAT4    # pull platform updates into a clone
-npm run brand:sync -- push --to ../CAT4      # port clone platform work upstream
+npm run brand:clone                          # → /Users/ryantang/white-label/<id>/
+npm run brand:sync -- pull --from /Users/ryantang/Documents/programming/CAT4
+npm run brand:sync -- push --to /Users/ryantang/Documents/programming/CAT4
 ```
 
-Path split: `.brand/paths.json`. Workflow: `.brand/README.md`.
+Path split: `.brand/paths.json`. Clones root: `.brand/config.json`. Workflow: `.brand/README.md`.
 
 ## Do not
 

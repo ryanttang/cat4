@@ -27,12 +27,12 @@ When the user asks to clone a brand, pull/push platform updates, or migrate feat
 
 | Intent | Command |
 |--------|---------|
-| New brand | `npm run brand:clone` |
+| New brand | `npm run brand:clone` → `/Users/ryantang/white-label/<id>/` |
 | Clone ← platform | `npm run brand:sync -- pull --from <peer>` |
 | Clone → platform | `npm run brand:sync -- push --to <peer>` |
 | Drift | `npm run brand:diff -- --peer <peer>` |
 
-Path split SSOT: `.brand/paths.json`. Cursor rule: `.cursor/rules/brand-clone-sync.mdc`.
+Clones root SSOT: `.brand/config.json` (`clonesRoot`). Path split SSOT: `.brand/paths.json`. Cursor rule: `.cursor/rules/brand-clone-sync.mdc`.
 
 ## Read this first
 

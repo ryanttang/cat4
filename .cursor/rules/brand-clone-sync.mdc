@@ -15,11 +15,13 @@ When the user asks to **clone**, **rebrand**, **white-label**, or **sync/migrate
 
 | Intent | Command |
 |--------|---------|
-| New brand site | `npm run brand:clone` |
+| New brand site | `npm run brand:clone` → `/Users/ryantang/white-label/<id>/` |
 | Pull platform updates into a clone | `npm run brand:sync -- pull --from <peer>` |
 | Port clone platform work upstream | `npm run brand:sync -- push --to <peer>` |
 | Preview drift | `npm run brand:diff -- --peer <peer>` |
 | Leftover brand strings | `npm run brand:doctor` |
+
+**Clones root:** `/Users/ryantang/white-label` (`.brand/config.json`). Each brand is its own ready-to-run directory under that folder. **Product catalog starts empty** — source products/`data` are excluded; add via Admin → Products.
 
 **Rules:**
 

@@ -12,6 +12,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const PLATFORM_ROOT = path.resolve(__dirname, "../..");
 
+/** Default parent for new brand clones (`<clonesRoot>/<brand-id>`). */
+export const DEFAULT_CLONES_ROOT = "/Users/ryantang/white-label";
+
 export function loadJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
@@ -19,6 +22,34 @@ export function loadJson(filePath) {
 export function writeJson(filePath, data) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`);
+}
+
+export function loadBrandConfig(repoRoot = PLATFORM_ROOT) {
+  const configPath = path.join(repoRoot, ".brand/config.json");
+  if (!fs.existsSync(configPath)) {
+    return { clonesRoot: DEFAULT_CLONES_ROOT, cloneExclude: [] };
+  }
+  const raw = loadJson(configPath);
+  return {
+    clonesRoot: raw.clonesRoot || DEFAULT_CLONES_ROOT,
+    cloneExclude: Array.isArray(raw.cloneExclude) ? raw.cloneExclude : [],
+    ...raw,
+  };
+}
+
+/** True if rel path should be omitted from a fresh white-label clone. */
+export function isCloneExcluded(relPath, cloneExclude = []) {
+  const norm = relPath.replace(/\\/g, "/");
+  for (const p of cloneExclude) {
+    const pat = p.replace(/\\/g, "/").replace(/\/+$/, "");
+    if (norm === pat || norm.startsWith(`${pat}/`)) return true;
+  }
+  return false;
+}
+
+export function defaultCloneDir(brandId, repoRoot = PLATFORM_ROOT) {
+  const { clonesRoot } = loadBrandConfig(repoRoot);
+  return path.join(path.resolve(clonesRoot), brandId);
 }
 
 export function loadPathsManifest(repoRoot = PLATFORM_ROOT) {
