@@ -1,6 +1,7 @@
 import {
   getQrScanCounts,
   getPublishedLandingPages,
+  getPublishedLinkPages,
   getSurveysByTypes,
   getStandaloneQrCodes,
   getRewardsDashboardStats,
@@ -17,6 +18,7 @@ export default async function AdminRewardsPage() {
     recentScans,
     recentClaims,
     promotions,
+    linkPages,
     surveys,
     polls,
   ] = await Promise.all([
@@ -26,6 +28,7 @@ export default async function AdminRewardsPage() {
     getRecentQrScansWithMeta(8),
     getRecentRewardClaims(8),
     getPublishedLandingPages(),
+    getPublishedLinkPages(),
     getSurveysByTypes(["survey", "questionnaire"]),
     getSurveysByTypes(["poll"]),
   ]);
@@ -43,6 +46,7 @@ export default async function AdminRewardsPage() {
         recentScans={recentScans}
         recentClaims={recentClaims}
         promotions={promotions}
+        linkPages={linkPages}
         surveys={surveys.filter((s) => s.status === "published")}
         polls={polls.filter((p) => p.status === "published")}
       />

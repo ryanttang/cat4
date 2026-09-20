@@ -18,6 +18,7 @@ import type {
   RewardClaim,
 } from "@/lib/db/schema";
 import type { QrScanWithMeta, RewardsDashboardStats } from "@/lib/data/qr-codes";
+import type { LinkPageWithContent } from "@/lib/data/links";
 
 type RewardsAdminProps = {
   stats: RewardsDashboardStats;
@@ -28,6 +29,7 @@ type RewardsAdminProps = {
   promotions: LandingPage[];
   surveys: Survey[];
   polls: Survey[];
+  linkPages?: LinkPageWithContent[];
 };
 
 export function RewardsAdmin({
@@ -37,6 +39,7 @@ export function RewardsAdmin({
   recentScans,
   recentClaims,
   promotions,
+  linkPages = [],
   surveys,
   polls,
 }: RewardsAdminProps) {
@@ -251,6 +254,7 @@ export function RewardsAdmin({
         <RewardsAdminForm
           qrCode={dialog.editing ?? undefined}
           promotions={promotions}
+          linkPages={linkPages}
           surveys={surveys}
           polls={polls}
           dialog

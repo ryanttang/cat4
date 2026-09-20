@@ -24,6 +24,19 @@ Quick map of product domains → schema → routes → primary modules.
 | Public | `/` via `BrandLanding` |
 | Notes | Do not merge these two concepts. |
 
+## Links (link-in-bio)
+
+| | |
+|--|--|
+| Storage | `link_pages` (`content` JSON). Legacy `site_settings` key `"links"` migrates if the table is empty |
+| Helpers | `lib/links.ts` |
+| Data | `lib/data/links.ts` |
+| Actions | `createLinkPage` / `updateLinkPage` / `deleteLinkPage`; subscribe via `subscribeAction` |
+| Public | `/links` (oldest published), `/links/[slug]` (chrome-less hub layout) |
+| Admin | `/admin/links` list + `/admin/links/[id]` editor |
+| QR | Each page auto-creates a dedicated `qr_codes` row (`destinationType: links_page`, `link_page_id`). Scan URL `/r/{code}` |
+| Notes | Not the homepage CMS. Distinct from per-QR `link_hub` configs and ambassador `/a/[slug]` hubs. QR destination `link_hub` can still opt into the default page via `useBrandLinksPage`. |
+
 ## Locations / education / about
 
 | Domain | Data module | Admin | Public |
@@ -70,7 +83,7 @@ Quick map of product domains → schema → routes → primary modules.
 | | |
 |--|--|
 | Tables | `qr_codes`, `qr_scans`, `reward_claims` |
-| Destinations | product_page, link_hub, promotion, survey, poll, subscribe, claim_reward, external_url |
+| Destinations | product_page, link_hub, links_page, promotion, survey, poll, subscribe, claim_reward, external_url |
 | Data | `lib/data/qr-codes.ts` |
 | Helpers | `lib/rewards/` |
 | Public | `/r/[code]` |
@@ -119,5 +132,6 @@ Quick map of product domains → schema → routes → primary modules.
 | `/[slug]` | Promotions |
 | `/r/` | QR / rewards destinations |
 | `/a/` | Ambassador vanity hubs |
+| `/links` | Brand link-in-bio page |
 | `/survey/` | Surveys |
 | `/poll/` | Polls |

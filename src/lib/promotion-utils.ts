@@ -142,6 +142,7 @@ export const RESERVED_PROMOTION_SLUGS = new Set([
   "education",
   "find",
   "l",
+  "links",
   "login",
   "poll",
   "products",

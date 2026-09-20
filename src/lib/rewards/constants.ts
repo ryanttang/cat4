@@ -1,8 +1,10 @@
 import type { QrDestinationConfig } from "@/lib/db/schema";
+import { brand } from "@/lib/brand";
 
 export const QR_DESTINATION_TYPES = [
   "product_page",
   "link_hub",
+  "links_page",
   "promotion",
   "survey",
   "poll",
@@ -16,6 +18,7 @@ export type QrDestinationType = (typeof QR_DESTINATION_TYPES)[number];
 export const QR_DESTINATION_LABELS: Record<QrDestinationType, string> = {
   product_page: "Product Page",
   link_hub: "Link Hub",
+  links_page: "Links Page",
   promotion: "Promotion",
   survey: "Survey",
   poll: "Poll",
@@ -68,10 +71,13 @@ export function defaultDestinationConfig(type: QrDestinationType): QrDestination
   switch (type) {
     case "link_hub":
       return {
+        useBrandLinksPage: true,
         hubTitle: "",
         hubBio: "",
-        links: [{ label: "Visit CAT4", url: "/" }],
+        links: [{ label: brand.defaults.hubLinkLabel, url: "/links" }],
       };
+    case "links_page":
+      return { linkPageId: undefined };
     case "claim_reward":
       return {
         claimForm: {

@@ -11,7 +11,7 @@ export default async function AdminCapturesPage() {
     <div>
       <AdminPageHeader
         title="Email Captures"
-        description="All email leads from subscribe, landing pages, and surveys."
+        description="All email leads from subscribe, the Links page, landing pages, and surveys."
       >
         <ExportCapturesButton />
       </AdminPageHeader>

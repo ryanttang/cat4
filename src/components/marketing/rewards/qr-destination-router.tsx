@@ -3,6 +3,7 @@ import {
   getQrCodeByCode,
   getProductById,
   getLandingPageById,
+  getLinkPageById,
   getSurveyById,
   logQrScan,
 } from "@/lib/data";
@@ -11,6 +12,7 @@ import { LinkHubView } from "@/components/marketing/rewards/link-hub-view";
 import { AmbassadorHubView } from "@/components/marketing/ambassadors/ambassador-hub-view";
 import { ClaimRewardForm } from "@/components/marketing/rewards/claim-reward-form";
 import { SubscribeSection } from "@/components/marketing/subscribe-section";
+import { LINKS_PAGE_PATH, linksPagePath } from "@/lib/links";
 import { headers } from "next/headers";
 import {
   getAmbassadorById,
@@ -81,6 +83,14 @@ export async function QrDestinationRouter({ qrCode, searchParams }: QrDestinatio
     case "subscribe":
       return <SubscribeSection source={`qr-${qrCode.code}`} compact />;
 
+    case "links_page": {
+      const linkPageId = qrCode.linkPageId ?? config.linkPageId;
+      if (!linkPageId) notFound();
+      const page = await getLinkPageById(linkPageId);
+      if (!page || page.status !== "published") notFound();
+      redirect(appendUtm(linksPagePath(page.slug), qrCode.code, searchParams));
+    }
+
     case "link_hub": {
       if (qrCode.ambassadorId) {
         const ambassador = await getAmbassadorById(qrCode.ambassadorId);
@@ -94,6 +104,9 @@ export async function QrDestinationRouter({ qrCode, searchParams }: QrDestinatio
             hub={hub}
           />
         );
+      }
+      if (config.useBrandLinksPage) {
+        redirect(LINKS_PAGE_PATH);
       }
       return <LinkHubView config={config} />;
     }

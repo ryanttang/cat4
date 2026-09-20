@@ -70,6 +70,7 @@ export const ambassadorLinkModeEnum = pgEnum("ambassador_link_mode", [
 export const qrDestinationTypeEnum = pgEnum("qr_destination_type", [
   "product_page",
   "link_hub",
+  "links_page",
   "promotion",
   "survey",
   "poll",
@@ -428,14 +429,29 @@ export const surveyAnswersRelations = relations(surveyAnswers, ({ one }) => ({
   }),
 }));
 
+// ─── Links pages (link-in-bio) ───────────────────────────────────────────────
+
+export const linkPages = pgTable("link_pages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  status: contentStatusEnum("status").notNull().default("draft"),
+  content: jsonb("content").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 // ─── QR Codes & Rewards ──────────────────────────────────────────────────────
 
 export type QrDestinationConfig = {
   hubTitle?: string;
   hubBio?: string;
   hubImageUrl?: string;
+  /** When true, standalone (non-ambassador) link hub QRs open the default Links page. */
+  useBrandLinksPage?: boolean;
   links?: Array<{ label: string; url: string }>;
   landingPageId?: string;
+  linkPageId?: string;
   surveyId?: string;
   claimForm?: {
     fields: Array<{ name: string; label: string; type: string; required: boolean }>;
@@ -461,6 +477,7 @@ export const qrCodes = pgTable(
     ambassadorId: uuid("ambassador_id").references(() => brandAmbassadors.id, {
       onDelete: "cascade",
     }),
+    linkPageId: uuid("link_page_id").references(() => linkPages.id, { onDelete: "cascade" }),
     destinationType: qrDestinationTypeEnum("destination_type").notNull().default("external_url"),
     destinationConfig: jsonb("destination_config").$type<QrDestinationConfig>().notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -469,6 +486,7 @@ export const qrCodes = pgTable(
   (table) => [
     uniqueIndex("qr_codes_product_id_idx").on(table.productId),
     uniqueIndex("qr_codes_ambassador_id_idx").on(table.ambassadorId),
+    uniqueIndex("qr_codes_link_page_id_idx").on(table.linkPageId),
   ]
 );
 
@@ -478,8 +496,16 @@ export const qrCodesRelations = relations(qrCodes, ({ one, many }) => ({
     fields: [qrCodes.ambassadorId],
     references: [brandAmbassadors.id],
   }),
+  linkPage: one(linkPages, { fields: [qrCodes.linkPageId], references: [linkPages.id] }),
   scans: many(qrScans),
   claims: many(rewardClaims),
+}));
+
+export const linkPagesRelations = relations(linkPages, ({ one }) => ({
+  qrCode: one(qrCodes, {
+    fields: [linkPages.id],
+    references: [qrCodes.linkPageId],
+  }),
 }));
 
 export const qrScans = pgTable("qr_scans", {
@@ -614,6 +640,7 @@ export type Product = typeof products.$inferSelect;
 export type Location = typeof locations.$inferSelect;
 export type EducationArticle = typeof educationArticles.$inferSelect;
 export type LandingPage = typeof landingPages.$inferSelect;
+export type LinkPage = typeof linkPages.$inferSelect;
 export type Survey = typeof surveys.$inferSelect;
 export type SurveyQuestion = typeof surveyQuestions.$inferSelect;
 export type Capture = typeof captures.$inferSelect;

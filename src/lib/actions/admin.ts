@@ -12,6 +12,8 @@ import {
   surveySchema,
   surveyQuestionSchema,
   homepageSchema,
+  linkPageCreateSchema,
+  linkPageUpdateSchema,
   userSchema,
   qrCodeSchema,
 } from "@/lib/validations";
@@ -40,6 +42,12 @@ import {
   addSurveyQuestion as addSurveyQuestionRecord,
   deleteSurveyQuestion as deleteSurveyQuestionRecord,
   updateHomepageContent as updateHomepageContentRecord,
+  createLinkPage as createLinkPageRecord,
+  updateLinkPage as updateLinkPageRecord,
+  deleteLinkPage as deleteLinkPageRecord,
+  getLinkPageById,
+  getQrCodeByLinkPageId,
+  createLinkPageQrCode,
   createUser as createUserRecord,
   deleteUser as deleteUserRecord,
   getDashboardStats as fetchDashboardStats,
@@ -331,6 +339,62 @@ export async function updateHomepageSettings(data: unknown): Promise<ActionResul
   await updateHomepageContentRecord(parsed.data);
   revalidatePath("/");
   revalidatePath("/admin/home");
+  return { success: true };
+}
+
+export async function createLinkPage(data: unknown): Promise<ActionResult> {
+  await requireAuth();
+  const parsed = linkPageCreateSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message };
+
+  const row = await createLinkPageRecord({
+    title: parsed.data.title,
+    slug: parsed.data.slug,
+    status: parsed.data.status ?? "published",
+  });
+  revalidatePath("/links");
+  revalidatePath(`/links/${row.slug}`);
+  revalidatePath("/admin/links");
+  revalidatePath("/admin/rewards");
+  return { success: true, id: row.id };
+}
+
+export async function updateLinkPage(id: string, data: unknown): Promise<ActionResult> {
+  await requireAuth();
+  const parsed = linkPageUpdateSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message };
+
+  const row = await updateLinkPageRecord(id, parsed.data);
+  if (!row) return { success: false, error: "Links page not found" };
+
+  const qrCode = await getQrCodeByLinkPageId(id);
+  if (qrCode) {
+    await updateQrCodeRecord(qrCode.id, {
+      title: `${row.title} QR`,
+      status: row.status === "archived" ? "draft" : row.status,
+      destinationType: "links_page",
+      destinationConfig: { linkPageId: row.id },
+    });
+  } else {
+    await createLinkPageQrCode(row.id, row.title, row.slug, row.status);
+  }
+
+  revalidatePath("/links");
+  revalidatePath(`/links/${row.slug}`);
+  revalidatePath("/admin/links");
+  revalidatePath(`/admin/links/${id}`);
+  revalidatePath("/admin/rewards");
+  return { success: true, id };
+}
+
+export async function deleteLinkPage(id: string): Promise<ActionResult> {
+  await requireAuth();
+  const existing = await getLinkPageById(id);
+  await deleteLinkPageRecord(id);
+  revalidatePath("/links");
+  if (existing?.slug) revalidatePath(`/links/${existing.slug}`);
+  revalidatePath("/admin/links");
+  revalidatePath("/admin/rewards");
   return { success: true };
 }
 

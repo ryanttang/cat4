@@ -20,6 +20,7 @@ import {
   Trophy,
   UsersRound,
   LineChart,
+  Link2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,7 @@ const navSections: NavSection[] = [
       { href: "/admin/rewards", label: "Rewards", icon: Trophy },
       { href: "/admin/ambassadors", label: "Ambassadors", icon: UsersRound },
       { href: "/admin/landing-pages", label: "Promotions", icon: Megaphone },
+      { href: "/admin/links", label: "Links", icon: Link2 },
       { href: "/admin/surveys", label: "Surveys", icon: ClipboardList },
       { href: "/admin/polls", label: "Polls", icon: BarChart3 },
       { href: "/admin/captures", label: "Subscribes", icon: Mail },

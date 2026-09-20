@@ -21,6 +21,7 @@ Keep in sync with `src/lib/brand.ts` → `colors` and `tailwind.config.ts` → `
 - Homepage CMS (video hero, lineup, favorites, education preview, CTAs)
 - Product catalog + PDPs across 5 categories (`flower`, `preroll`, `cartridge`, `extract`, `merch`)
 - Education hub, About, store locator (`/find`), subscribe
+- Link-in-bio pages (`/links`, `/links/[slug]`) — each page gets its own QR; buttons, hero, product thumbnails, subscribe capture, surveys/polls
 - Age gate (21+)
 - Promotions (`/[slug]`) — sweepstakes, raffles, giveaways, contests, promotions
 - Surveys & polls (`/survey/[slug]`, `/poll/[slug]`) with optional live results
@@ -30,6 +31,7 @@ Keep in sync with `src/lib/brand.ts` → `colors` and `tailwind.config.ts` → `
 ### Admin Dashboard (`/admin`)
 - Email/password auth — **Admin**, **Staff** (and separate **Ambassador** portal)
 - Homepage CMS, Hero media (Vercel Blob), Products, Locations, Education, About
+- Links (link-in-bio) builder
 - Promotions builder, Surveys, Polls
 - Rewards / QR management + CSV exports
 - Ambassadors management

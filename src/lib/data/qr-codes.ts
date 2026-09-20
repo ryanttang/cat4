@@ -26,6 +26,7 @@ type CreateQrCodeInput = {
   status?: QrCode["status"];
   productId?: string | null;
   ambassadorId?: string | null;
+  linkPageId?: string | null;
   destinationType: QrCode["destinationType"];
   destinationConfig?: QrDestinationConfig;
 };
@@ -122,6 +123,15 @@ export async function getQrCodeByAmbassadorId(ambassadorId: string): Promise<QrC
   return row ?? null;
 }
 
+export async function getQrCodeByLinkPageId(linkPageId: string): Promise<QrCode | null> {
+  if (isMockDataMode()) {
+    return mockQrCodes().find((q) => q.linkPageId === linkPageId) ?? null;
+  }
+
+  const [row] = await getDb().select().from(qrCodes).where(eq(qrCodes.linkPageId, linkPageId)).limit(1);
+  return row ?? null;
+}
+
 export async function getQrScanCounts(): Promise<Array<{ qrCodeId: string; count: number }>> {
   if (isMockDataMode()) {
     const counts = new Map<string, number>();
@@ -152,6 +162,7 @@ export async function createQrCode(data: CreateQrCodeInput): Promise<QrCode> {
       status: data.status ?? "draft",
       productId: data.productId ?? null,
       ambassadorId: data.ambassadorId ?? null,
+      linkPageId: data.linkPageId ?? null,
       destinationType: data.destinationType,
       destinationConfig: data.destinationConfig ?? {},
       createdAt: timestamp,
@@ -169,6 +180,7 @@ export async function createQrCode(data: CreateQrCodeInput): Promise<QrCode> {
       status: data.status ?? "draft",
       productId: data.productId ?? null,
       ambassadorId: data.ambassadorId ?? null,
+      linkPageId: data.linkPageId ?? null,
       destinationType: data.destinationType,
       destinationConfig: data.destinationConfig ?? {},
     })
@@ -195,6 +207,25 @@ export async function createProductQrCode(
   });
 }
 
+export async function createLinkPageQrCode(
+  linkPageId: string,
+  title: string,
+  slug?: string,
+  status: QrCode["status"] = "published"
+): Promise<QrCode> {
+  const existing = await getQrCodeByLinkPageId(linkPageId);
+  if (existing) return existing;
+
+  return createQrCode({
+    title: `${title} QR`,
+    code: slug ? slug.slice(0, 24) : undefined,
+    status: status === "archived" ? "draft" : status,
+    linkPageId,
+    destinationType: "links_page",
+    destinationConfig: { linkPageId },
+  });
+}
+
 export async function updateQrCode(id: string, data: UpdateQrCodeInput): Promise<QrCode | null> {
   if (isMockDataMode()) {
     const index = mockStore.qrCodes.findIndex((q) => q.id === id);
@@ -208,6 +239,7 @@ export async function updateQrCode(id: string, data: UpdateQrCodeInput): Promise
       destinationConfig: data.destinationConfig ?? current.destinationConfig,
       productId: data.productId !== undefined ? data.productId : current.productId,
       ambassadorId: data.ambassadorId !== undefined ? data.ambassadorId : current.ambassadorId,
+      linkPageId: data.linkPageId !== undefined ? data.linkPageId : current.linkPageId,
       updatedAt: now(),
     };
     mockStore.qrCodes[index] = updated;
@@ -219,6 +251,7 @@ export async function updateQrCode(id: string, data: UpdateQrCodeInput): Promise
   if (data.status !== undefined) updates.status = data.status;
   if (data.productId !== undefined) updates.productId = data.productId;
   if (data.ambassadorId !== undefined) updates.ambassadorId = data.ambassadorId;
+  if (data.linkPageId !== undefined) updates.linkPageId = data.linkPageId;
   if (data.destinationType !== undefined) updates.destinationType = data.destinationType;
   if (data.destinationConfig !== undefined) updates.destinationConfig = data.destinationConfig;
   if (data.code !== undefined) updates.code = await ensureUniqueCodeForUpdate(id, data.code);
@@ -444,7 +477,7 @@ export async function getRecentRewardClaims(limit = 5): Promise<RewardClaim[]> {
 
 export async function getStandaloneQrCodes(): Promise<QrCode[]> {
   const all = await getAllQrCodes();
-  return all.filter((q) => !q.productId && !q.ambassadorId);
+  return all.filter((q) => !q.productId && !q.ambassadorId && !q.linkPageId);
 }
 
 export type QrScanWithMeta = QrScan & {
@@ -534,7 +567,7 @@ export async function getRewardsDashboardStats(): Promise<RewardsDashboardStats>
     totalScans,
     totalClaims,
     productQrCount: allQr.filter((q) => q.productId).length,
-    standaloneQrCount: allQr.filter((q) => !q.productId && !q.ambassadorId).length,
+    standaloneQrCount: allQr.filter((q) => !q.productId && !q.ambassadorId && !q.linkPageId).length,
     scansByDevice: Array.from(deviceCounts.entries()).map(([deviceType, count]) => ({
       deviceType,
       count,

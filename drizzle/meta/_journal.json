@@ -29,6 +29,13 @@
       "when": 1784140000000,
       "tag": "0003_landing_page_promotion_type",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789878000000,
+      "tag": "0004_link_pages",
+      "breakpoints": true
     }
   ]
 }

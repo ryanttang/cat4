@@ -60,6 +60,7 @@ Clones root SSOT: `.brand/config.json` (`clonesRoot`). Path split SSOT: `.brand/
 | Auth / roles | `src/lib/auth*.ts`, `src/middleware.ts`, `src/lib/auth-utils.ts` |
 | Product categories | `src/lib/categories.ts` |
 | Homepage CMS JSON | `src/lib/homepage.ts` + `site_settings` key `"homepage"` |
+| Links pages | `src/lib/links.ts` + `link_pages` (legacy `site_settings` key `"links"` migrates on first read) |
 | Theme tokens | `tailwind.config.ts` (`cat4.*`) — keep hex in sync with `brand.colors` |
 | Env contract | `.env.example` |
 | Clone / sync tooling | `.brand/README.md`, `.brand/paths.json`, `npm run brand:*` |
@@ -91,7 +92,7 @@ UI (RSC pages / client forms)
 | Marketing | `src/app/(marketing)/` | Public (+ age gate) |
 | Admin CMS | `src/app/admin/` | `admin` \| `staff` (middleware) |
 | Ambassador portal | `src/app/ambassador/` | `ambassador` role |
-| Short public links | `/[slug]` promotions, `/r/*` QR, `/a/*` ambassador hubs, `/survey/*`, `/poll/*` | Public |
+| Short public links | `/[slug]` promotions, `/r/*` QR, `/a/*` ambassador hubs, `/links`, `/survey/*`, `/poll/*` | Public |
 | API | `src/app/api/` | Thin exceptions only |
 
 Components: `components/ui` (primitives) · `components/marketing` · `components/admin` · `components/surveys`.
@@ -129,7 +130,7 @@ See [extending.md](extending.md) for worked examples.
 - Implementing only the DB path (or only mock) for a new data function
 - Hardcoding `"CAT4"` in new UI/consent/metadata (use `brand`)
 - Adding multi-tenant brand FKs for a simple white-label clone
-- Conflating homepage JSON (`/admin/home`) with `hero_blocks` (`/admin/hero`)
+- Conflating homepage JSON (`/admin/home`) with `hero_blocks` (`/admin/hero`) or Links (`/admin/links`)
 - Using UI labels as folder names (Promotions → `landing-pages`, Rewards → QR codes)
 - Migrating forms to `react-hook-form` without an explicit decision
 

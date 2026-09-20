@@ -15,6 +15,7 @@ export const MOCK_QR_CODES: QrCode[] = [
     status: "published",
     productId: "00000000-0000-4000-8000-000000000100",
     ambassadorId: null,
+    linkPageId: null,
     destinationType: "product_page",
     destinationConfig: {},
     ...ts(),
@@ -26,6 +27,7 @@ export const MOCK_QR_CODES: QrCode[] = [
     status: "published",
     productId: null,
     ambassadorId: null,
+    linkPageId: null,
     destinationType: "link_hub",
     destinationConfig: {
       hubTitle: "CAT4",
@@ -45,6 +47,7 @@ export const MOCK_QR_CODES: QrCode[] = [
     status: "published",
     productId: null,
     ambassadorId: null,
+    linkPageId: null,
     destinationType: "claim_reward",
     destinationConfig: {
       claimForm: {

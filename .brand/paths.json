@@ -8,6 +8,7 @@
     "src/app/ambassador",
     "src/app/api",
     "src/app/(marketing)",
+    "src/app/(hub)",
     "drizzle",
     "drizzle.config.ts",
     "vitest.config.ts",

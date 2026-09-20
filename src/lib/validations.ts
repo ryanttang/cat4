@@ -292,10 +292,61 @@ export const homepageSchema = z.object({
   }),
 });
 
+export const linksButtonSchema = z.object({
+  id: z.string().min(1),
+  type: z.enum(["url", "product", "survey", "poll", "subscribe"]),
+  label: z.string().min(1),
+  enabled: z.boolean(),
+  url: z.string().optional(),
+  productId: z.string().optional(),
+  surveyId: z.string().optional(),
+});
+
+export const linkPageCreateSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers, and hyphens"),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+});
+
+export const linksPageSchema = z.object({
+  published: z.boolean(),
+  seo: z.object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+  }),
+  appearance: z.object({
+    title: z.string().min(1),
+    bio: z.string(),
+    heroImageUrl: z.string(),
+    heroStyle: z.enum(["avatar", "banner"]),
+    backgroundStyle: z.enum(["brand", "image"]),
+    backgroundImageUrl: z.string(),
+    buttonStyle: z.enum(["filled", "outline"]),
+  }),
+  buttons: z.array(linksButtonSchema),
+  products: z.object({
+    enabled: z.boolean(),
+    heading: z.string(),
+    productIds: z.array(z.string()),
+  }),
+  subscribe: z.object({
+    modalTitle: z.string().min(1),
+    modalBody: z.string(),
+  }),
+});
+
+export const linkPageUpdateSchema = linkPageCreateSchema.extend({
+  content: linksPageSchema,
+});
+
 const qrDestinationConfigSchema = z.object({
   hubTitle: z.string().optional(),
   hubBio: z.string().optional(),
   hubImageUrl: z.string().optional(),
+  useBrandLinksPage: z.boolean().optional(),
   links: z
     .array(
       z.object({
@@ -305,6 +356,7 @@ const qrDestinationConfigSchema = z.object({
     )
     .optional(),
   landingPageId: z.string().uuid().optional(),
+  linkPageId: z.string().uuid().optional(),
   surveyId: z.string().uuid().optional(),
   claimForm: z
     .object({
@@ -343,6 +395,7 @@ export const qrCodeSchema = z.object({
   destinationType: z.enum([
     "product_page",
     "link_hub",
+    "links_page",
     "promotion",
     "survey",
     "poll",

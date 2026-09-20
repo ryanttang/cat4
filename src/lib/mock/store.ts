@@ -23,6 +23,7 @@ import type {
   Location,
   EducationArticle,
   LandingPage,
+  LinkPage,
   Survey,
   Capture,
   User,
@@ -99,6 +100,29 @@ export const mockStore = {
   landingPages: [MOCK_SWEEPSTAKES_PAGE] as LandingPage[],
   landingPageEntries: [...MOCK_SWEEPSTAKES_ENTRIES] as LandingPageEntry[],
 
+  linkPages: [
+    {
+      id: "00000000-0000-4000-8000-000000000060",
+      slug: "main",
+      title: "CAT4",
+      status: "published" as const,
+      content: {
+        products: {
+          enabled: true,
+          heading: "Featured products",
+          productIds: [
+            "00000000-0000-4000-8000-000000000100",
+            "00000000-0000-4000-8000-000000000101",
+            "00000000-0000-4000-8000-000000000102",
+            "00000000-0000-4000-8000-000000000103",
+          ],
+        },
+      },
+      createdAt: now,
+      updatedAt: now,
+    },
+  ] as LinkPage[],
+
   surveys: [] as Survey[],
   surveyQuestions: [] as SurveyQuestion[],
   surveyResponses: [] as Array<{
@@ -120,6 +144,23 @@ export const mockStore = {
       id: "00000000-0000-4000-8000-000000000050",
       key: "homepage",
       value: {},
+      updatedAt: now,
+    },
+    {
+      id: "00000000-0000-4000-8000-000000000052",
+      key: "links",
+      value: {
+        products: {
+          enabled: true,
+          heading: "Featured products",
+          productIds: [
+            "00000000-0000-4000-8000-000000000100",
+            "00000000-0000-4000-8000-000000000101",
+            "00000000-0000-4000-8000-000000000102",
+            "00000000-0000-4000-8000-000000000103",
+          ],
+        },
+      },
       updatedAt: now,
     },
     {
@@ -154,7 +195,23 @@ export const mockStore = {
     createdAt: Date;
   }>,
 
-  qrCodes: [...MOCK_QR_CODES, ...MOCK_AMBASSADOR_QR_CODES] as QrCode[],
+  qrCodes: [
+    ...MOCK_QR_CODES,
+    ...MOCK_AMBASSADOR_QR_CODES,
+    {
+      id: "00000000-0000-4000-8000-000000000061",
+      code: "main",
+      title: "CAT4 QR",
+      status: "published" as const,
+      productId: null,
+      ambassadorId: null,
+      linkPageId: "00000000-0000-4000-8000-000000000060",
+      destinationType: "links_page" as const,
+      destinationConfig: { linkPageId: "00000000-0000-4000-8000-000000000060" },
+      createdAt: now,
+      updatedAt: now,
+    },
+  ] as QrCode[],
   qrScans: [...MOCK_QR_SCANS] as QrScan[],
   rewardClaims: [...MOCK_REWARD_CLAIMS] as RewardClaim[],
 

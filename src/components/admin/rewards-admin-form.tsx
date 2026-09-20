@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -24,7 +26,9 @@ import {
 } from "@/lib/rewards/constants";
 import { slugify } from "@/lib/utils";
 import { brand } from "@/lib/brand";
+import { LINKS_PAGE_PATH } from "@/lib/links";
 import type { QrCode, QrDestinationConfig, LandingPage, Survey } from "@/lib/db/schema";
+import type { LinkPageWithContent } from "@/lib/data/links";
 import type { AdminDialogFormProps } from "@/components/admin/admin-form-dialog";
 import { Trash2, Plus } from "lucide-react";
 
@@ -33,6 +37,7 @@ type RewardsAdminFormProps = AdminDialogFormProps & {
   promotions: LandingPage[];
   surveys: Survey[];
   polls: Survey[];
+  linkPages?: LinkPageWithContent[];
 };
 
 export function RewardsAdminForm({
@@ -40,6 +45,7 @@ export function RewardsAdminForm({
   promotions,
   surveys,
   polls,
+  linkPages = [],
   onSuccess,
 }: RewardsAdminFormProps) {
   const config = (qrCode?.destinationConfig ?? {}) as QrDestinationConfig;
@@ -56,7 +62,11 @@ export function RewardsAdminForm({
   const [links, setLinks] = useState(
     config.links ?? [{ label: brand.defaults.hubLinkLabel, url: "/" }]
   );
+  const [useBrandLinksPage, setUseBrandLinksPage] = useState(
+    config.useBrandLinksPage ?? !qrCode
+  );
   const [landingPageId, setLandingPageId] = useState(config.landingPageId ?? "");
+  const [linkPageId, setLinkPageId] = useState(config.linkPageId ?? qrCode?.linkPageId ?? "");
   const [surveyId, setSurveyId] = useState(config.surveyId ?? "");
   const [externalUrl, setExternalUrl] = useState(config.externalUrl ?? "");
   const [claimFields, setClaimFields] = useState(
@@ -94,6 +104,7 @@ export function RewardsAdminForm({
     if (value === "link_hub" && !qrCode) {
       setHubTitle(title);
       setLinks(defaults.links ?? links);
+      setUseBrandLinksPage(defaults.useBrandLinksPage ?? true);
     }
     if (value === "claim_reward" && !config.claimForm) {
       setClaimFields(defaults.claimForm?.fields ?? claimFields);
@@ -109,9 +120,13 @@ export function RewardsAdminForm({
   function buildDestinationConfig(): QrDestinationConfig {
     switch (destinationType) {
       case "link_hub":
-        return { hubTitle, hubBio, hubImageUrl: hubImageUrl || undefined, links };
+        return useBrandLinksPage
+          ? { useBrandLinksPage: true }
+          : { hubTitle, hubBio, hubImageUrl: hubImageUrl || undefined, links };
       case "promotion":
         return { landingPageId: landingPageId || undefined };
+      case "links_page":
+        return { linkPageId: linkPageId || undefined };
       case "survey":
       case "poll":
         return { surveyId: surveyId || undefined };
@@ -134,8 +149,12 @@ export function RewardsAdminForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    if (destinationType === "links_page" && !linkPageId) {
+      setError("Select a links page");
+      return;
+    }
+    setLoading(true);
 
     const payload = {
       title,
@@ -231,6 +250,25 @@ export function RewardsAdminForm({
 
       {destinationType === "link_hub" && (
         <div className="space-y-4 rounded-lg border border-border p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label htmlFor="use-brand-links">Use brand Links page</Label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Scanners open{" "}
+                <Link href="/admin/links" className="text-cat4-blue hover:underline">
+                  Brand Tools → Links
+                </Link>{" "}
+                ({LINKS_PAGE_PATH}).
+              </p>
+            </div>
+            <Switch
+              id="use-brand-links"
+              checked={useBrandLinksPage}
+              onCheckedChange={setUseBrandLinksPage}
+            />
+          </div>
+          {!useBrandLinksPage && (
+            <>
           <div>
             <Label>Hub Title</Label>
             <Input value={hubTitle} onChange={(e) => setHubTitle(e.target.value)} className="mt-1" />
@@ -284,6 +322,8 @@ export function RewardsAdminForm({
               Add Link
             </Button>
           </div>
+            </>
+          )}
         </div>
       )}
 
@@ -302,6 +342,30 @@ export function RewardsAdminForm({
               ))}
             </SelectContent>
           </Select>
+        </div>
+      )}
+
+      {destinationType === "links_page" && (
+        <div>
+          <Label>Links page</Label>
+          {linkPages.length === 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              No links pages yet. Create one under Brand Tools → Links.
+            </p>
+          ) : (
+            <Select value={linkPageId || undefined} onValueChange={setLinkPageId}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Select links page" />
+              </SelectTrigger>
+              <SelectContent>
+                {linkPages.map((page) => (
+                  <SelectItem key={page.id} value={page.id}>
+                    {page.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       )}
 

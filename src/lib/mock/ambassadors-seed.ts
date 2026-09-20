@@ -52,6 +52,7 @@ export const MOCK_AMBASSADOR_QR_CODES: QrCode[] = [
     status: "published",
     productId: null,
     ambassadorId: "00000000-0000-4000-8000-000000000300",
+    linkPageId: null,
     destinationType: "link_hub",
     destinationConfig: {
       hubTitle: "CAT4",
@@ -70,6 +71,7 @@ export const MOCK_AMBASSADOR_QR_CODES: QrCode[] = [
     status: "published",
     productId: null,
     ambassadorId: "00000000-0000-4000-8000-000000000302",
+    linkPageId: null,
     destinationType: "link_hub",
     destinationConfig: {
       hubTitle: "Mike Smith | CAT4",

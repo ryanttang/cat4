@@ -24,6 +24,7 @@
 | Rewards | QR codes, `/r/[code]`, `/admin/rewards` |
 | Subscribes | `captures`, subscribers |
 | Home (CMS) | `homepage` setting JSON — not `hero_blocks` |
+| Links | `link_pages`, `/links`, `/links/[slug]`, `/admin/links` |
 | Hero | `hero_blocks` / `/admin/hero` |
 | Polls | `surveys` where `type = 'poll'` |
 
@@ -79,7 +80,7 @@ Never trust client-sent role fields.
 1. **Direct Drizzle in pages/components** — breaks mock mode and layering.
 2. **DB-only data functions** — breaks local design workflow.
 3. **New polls table** — use `survey_type` on `surveys`.
-4. **Conflating homepage JSON and hero_blocks** — two different admin surfaces.
+4. **Conflating homepage JSON, hero_blocks, and Links** — three different admin surfaces.
 5. **Global client state libraries** — RSC + actions + local state only.
 6. **REST CRUD for CMS entities** — Server Actions are the write API.
 7. **Hardcoded brand name** in new code — use `src/lib/brand.ts`.

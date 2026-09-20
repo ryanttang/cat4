@@ -12,6 +12,7 @@ export * from "./about";
 export * from "./landing-pages";
 export * from "./surveys";
 export * from "./site-settings";
+export * from "./links";
 export * from "./captures";
 export * from "./users";
 export * from "./qr-codes";
