@@ -12,6 +12,20 @@ describe("survey intake helpers", () => {
     expect(settings.participationConsentEnabled).toBe(false);
     expect(settings.marketingConsentEnabled).toBe(false);
     expect(settings.profileFields).toEqual([]);
+    expect(settings.disclaimerText).toBe(brand.defaults.surveyDisclaimer);
+    expect(settings.participationConsentText).toBe(brand.defaults.surveyParticipationConsent);
+    expect(settings.marketingConsentText).toBe(brand.defaults.surveyMarketingConsent);
+  });
+
+  it("keeps custom survey copy when it is already set", () => {
+    const settings = mergeSurveySettings({
+      disclaimerText: "Custom disclaimer.",
+      participationConsentText: "Custom participate.",
+      marketingConsentText: "Custom marketing.",
+    });
+    expect(settings.disclaimerText).toBe("Custom disclaimer.");
+    expect(settings.participationConsentText).toBe("Custom participate.");
+    expect(settings.marketingConsentText).toBe("Custom marketing.");
   });
 
   it("falls back to title and brand consent copy", () => {
@@ -22,8 +36,9 @@ describe("survey intake helpers", () => {
     });
     expect(copy.headline).toBe("Booth survey");
     expect(copy.subtext).toBe("Tell us what you like.");
+    expect(copy.disclaimerText).toBe(brand.defaults.surveyDisclaimer);
     expect(copy.participationConsentText).toBe(brand.defaults.surveyParticipationConsent);
-    expect(copy.marketingConsentText).toBe(brand.defaults.marketingConsent);
+    expect(copy.marketingConsentText).toBe(brand.defaults.surveyMarketingConsent);
   });
 
   it("requires enabled profile fields and consents", () => {

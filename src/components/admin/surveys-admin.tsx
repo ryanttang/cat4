@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Eye, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageHeader, adminTableWrapClass } from "@/components/admin/admin-ui";
@@ -100,23 +100,35 @@ export function SurveysAdmin({ surveys, responseCounts, questionsBySurveyId }: S
                       <span className="text-muted-foreground">Admin only</span>
                     )}
                   </td>
-                  <td className="space-x-2 p-4">
-                    <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(survey)}>
-                      Edit
-                    </Button>
-                    <Button asChild variant="ghost" size="sm">
-                      <Link href={`/admin/surveys/${survey.id}/responses`}>Responses</Link>
-                    </Button>
-                    <Button asChild variant="ghost" size="sm">
-                      <Link href={`/admin/surveys/${survey.id}/results`}>Live Results</Link>
-                    </Button>
-                    {survey.publicResultsEnabled && (
-                      <Button asChild variant="ghost" size="sm">
-                        <Link href={`/survey/${survey.slug}/results`} target="_blank">
-                          Public
+                  <td className="p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button asChild variant="ghost" size="icon" className="h-9 w-9">
+                        <Link
+                          href={`/survey/${survey.slug}`}
+                          target="_blank"
+                          aria-label={`View ${survey.title}`}
+                          title="View survey"
+                        >
+                          <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
-                    )}
+                      <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(survey)}>
+                        Edit
+                      </Button>
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/admin/surveys/${survey.id}/responses`}>Responses</Link>
+                      </Button>
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/admin/surveys/${survey.id}/results`}>Live Results</Link>
+                      </Button>
+                      {survey.publicResultsEnabled && (
+                        <Button asChild variant="ghost" size="sm">
+                          <Link href={`/survey/${survey.slug}/results`} target="_blank">
+                            Public
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

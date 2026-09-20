@@ -47,12 +47,14 @@ export function mergeSurveySettings(settings?: SurveySettings | null): {
     resultsRefreshSeconds: settings?.resultsRefreshSeconds,
     headline: settings?.headline ?? "",
     subtext: settings?.subtext ?? "",
-    disclaimerText: settings?.disclaimerText ?? "",
+    disclaimerText: settings?.disclaimerText?.trim() || brand.defaults.surveyDisclaimer,
     emailLabel: settings?.emailLabel ?? "",
     participationConsentEnabled: settings?.participationConsentEnabled ?? false,
-    participationConsentText: settings?.participationConsentText ?? "",
+    participationConsentText:
+      settings?.participationConsentText?.trim() || brand.defaults.surveyParticipationConsent,
     marketingConsentEnabled: settings?.marketingConsentEnabled ?? false,
-    marketingConsentText: settings?.marketingConsentText ?? "",
+    marketingConsentText:
+      settings?.marketingConsentText?.trim() || brand.defaults.surveyMarketingConsent,
     marketingConsentRequired: settings?.marketingConsentRequired ?? false,
     profileFields: (settings?.profileFields ?? []).map((field) =>
       createSurveyProfileField(field)
@@ -80,11 +82,9 @@ export function resolveSurveyPublicCopy(survey: {
     disclaimerText: settings.disclaimerText.trim(),
     emailLabel: settings.emailLabel.trim() || "Email",
     participationConsentEnabled: settings.participationConsentEnabled,
-    participationConsentText:
-      settings.participationConsentText.trim() || brand.defaults.surveyParticipationConsent,
+    participationConsentText: settings.participationConsentText,
     marketingConsentEnabled: settings.marketingConsentEnabled,
-    marketingConsentText:
-      settings.marketingConsentText.trim() || brand.defaults.marketingConsent,
+    marketingConsentText: settings.marketingConsentText,
     marketingConsentRequired: settings.marketingConsentRequired,
     profileFields: settings.profileFields,
   };

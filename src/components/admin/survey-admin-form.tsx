@@ -260,9 +260,11 @@ export function SurveyAdminForm({
           <Textarea
             value={settings.disclaimerText}
             onChange={(e) => updateSetting("disclaimerText", e.target.value)}
-            className="mt-1"
-            placeholder="Optional legal or prize disclaimer shown above the consent boxes"
+            className="mt-1 min-h-28"
           />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Shown above the consent checkboxes. Starts with the brand default.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -364,8 +366,8 @@ export function SurveyAdminForm({
           <div>
             <h3 className="text-sm font-semibold">Consent</h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              Checkbox copy is shown on the public survey. Leave the text blank to use the brand
-              default.
+              Each survey starts with complete brand default copy. Edit it here for this page
+              only.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -375,17 +377,14 @@ export function SurveyAdminForm({
             />
             <Label>Require participation agreement</Label>
           </div>
-          {settings.participationConsentEnabled && (
-            <div>
-              <Label>Participation checkbox copy</Label>
-              <Textarea
-                value={settings.participationConsentText}
-                onChange={(e) => updateSetting("participationConsentText", e.target.value)}
-                className="mt-1"
-                placeholder="I agree to participate in this survey."
-              />
-            </div>
-          )}
+          <div>
+            <Label>Participation checkbox copy</Label>
+            <Textarea
+              value={settings.participationConsentText}
+              onChange={(e) => updateSetting("participationConsentText", e.target.value)}
+              className="mt-1 min-h-24"
+            />
+          </div>
           <div className="flex items-center gap-2">
             <Switch
               checked={settings.marketingConsentEnabled}
@@ -394,25 +393,22 @@ export function SurveyAdminForm({
             <Label>Show marketing opt-in</Label>
           </div>
           {settings.marketingConsentEnabled && (
-            <>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={settings.marketingConsentRequired}
-                  onCheckedChange={(value) => updateSetting("marketingConsentRequired", value)}
-                />
-                <Label>Require marketing opt-in to submit</Label>
-              </div>
-              <div>
-                <Label>Marketing checkbox copy</Label>
-                <Textarea
-                  value={settings.marketingConsentText}
-                  onChange={(e) => updateSetting("marketingConsentText", e.target.value)}
-                  className="mt-1"
-                  placeholder="I agree to receive marketing emails."
-                />
-              </div>
-            </>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={settings.marketingConsentRequired}
+                onCheckedChange={(value) => updateSetting("marketingConsentRequired", value)}
+              />
+              <Label>Require marketing opt-in to submit</Label>
+            </div>
           )}
+          <div>
+            <Label>Marketing checkbox copy</Label>
+            <Textarea
+              value={settings.marketingConsentText}
+              onChange={(e) => updateSetting("marketingConsentText", e.target.value)}
+              className="mt-1 min-h-24"
+            />
+          </div>
         </div>
         {survey && (
           <div className="space-y-2 text-sm text-muted-foreground">

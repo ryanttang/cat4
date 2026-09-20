@@ -30,7 +30,12 @@ export const brand = {
     seedAdminEmail: "admin@cat4.com",
     seedAdminName: "CAT4 Admin",
     marketingConsent: "I agree to receive marketing emails from CAT4. Unsubscribe anytime.",
-    surveyParticipationConsent: "I agree to participate in this survey from CAT4.",
+    surveyDisclaimer:
+      "You must be 21 years of age or older to participate. By submitting this form, you confirm that the information you provide is accurate. CAT4 may use your responses to understand customer preferences and to improve products, events, and communications. If this survey is connected to a promotion, sweepstakes, or prize, official rules apply and no purchase is necessary unless otherwise stated. Limit one submission per person unless the survey says otherwise. CAT4 is not responsible for incomplete, lost, or misdirected submissions.",
+    surveyParticipationConsent:
+      "I confirm that I am 21 years of age or older and that I have read the disclaimer. I agree to participate in this survey and I consent to CAT4 collecting, storing, and using my responses and the contact information I provide for this survey.",
+    surveyMarketingConsent:
+      "I agree to receive marketing emails, product updates, event invitations, and other promotional messages from CAT4. I understand I can unsubscribe at any time using the link in any email or by contacting CAT4.",
     promotionConsent: "I agree to the official rules and to receive emails from CAT4.",
     rewardCodePrefix: "CAT4-",
     hubTitle: "CAT4",
