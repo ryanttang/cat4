@@ -791,13 +791,19 @@ export function LinksPageForm({
           </Button>
           <Button
             type="button"
-            variant="ghost"
-            className="text-destructive hover:text-destructive"
+            variant="destructive"
+            disabled={loading}
             onClick={async () => {
-              if (!confirm("Delete this links page and its QR code?")) return;
+              if (!confirm(`Delete "${page.title}" and its QR code? This cannot be undone.`)) return;
+              setLoading(true);
               const result = await deleteLinkPage(page.id);
-              if (result.success) router.push("/admin/links");
-              else setError(result.error ?? "Failed to delete");
+              if (result.success) {
+                router.push("/admin/links");
+                router.refresh();
+                return;
+              }
+              setError(result.error ?? "Failed to delete");
+              setLoading(false);
             }}
           >
             Delete

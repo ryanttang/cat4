@@ -64,7 +64,7 @@ Quick map of product domains → schema → routes → primary modules.
 | Data | `lib/data/surveys.ts` |
 | Helpers | `lib/surveys/` |
 | Public | `/survey/[slug]`, `/poll/[slug]` (+ results) |
-| Admin | `/admin/surveys`, `/admin/polls` |
+| Admin | `/admin/surveys`, `/admin/surveys/[id]/responses`, `/admin/polls` |
 | API | `/api/surveys/[id]/results` |
 | UI shared | `components/surveys/*` |
 

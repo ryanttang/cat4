@@ -105,6 +105,9 @@ export function SurveysAdmin({ surveys, responseCounts, questionsBySurveyId }: S
                       Edit
                     </Button>
                     <Button asChild variant="ghost" size="sm">
+                      <Link href={`/admin/surveys/${survey.id}/responses`}>Responses</Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm">
                       <Link href={`/admin/surveys/${survey.id}/results`}>Live Results</Link>
                     </Button>
                     {survey.publicResultsEnabled && (

@@ -169,6 +169,15 @@ export function getChoiceOptions(question: SurveyQuestion): string[] {
   return question.options ?? [];
 }
 
+export function formatSurveyAnswerValue(answer: unknown): string {
+  if (answer == null || answer === "") return "—";
+  if (Array.isArray(answer)) {
+    return answer.length > 0 ? answer.map((item) => String(item)).join(", ") : "—";
+  }
+  if (typeof answer === "object") return JSON.stringify(answer);
+  return String(answer);
+}
+
 export function getNumericLabels(question: SurveyQuestion): { min: string; max: string } {
   if (question.type === "nps") return { min: "0 - Not likely", max: "10 - Very likely" };
   if (question.type === "rating") {

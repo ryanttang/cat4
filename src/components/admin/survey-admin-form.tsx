@@ -222,6 +222,11 @@ export function SurveyAdminForm({
                 /survey/{survey.slug}
               </Link>
             </p>
+            <p>
+              <Link href={`/admin/surveys/${survey.id}/responses`} className="text-cat4-blue underline">
+                View responses
+              </Link>
+            </p>
             {publicResultsEnabled && (
               <p>
                 Results URL:{" "}

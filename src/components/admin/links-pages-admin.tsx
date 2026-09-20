@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, ExternalLink, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AdminPageHeader, AdminPanel, adminTableWrapClass } from "@/components/admin/admin-ui";
 import { AdminFormDialog, useAdminFormDialog } from "@/components/admin/admin-form-dialog";
 import { LinksPageCreateForm } from "@/components/admin/links-page-create-form";
+import { deleteLinkPage } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/utils";
 import { linksPagePath } from "@/lib/links";
 import { qrScanPath } from "@/lib/rewards/constants";
@@ -19,7 +22,17 @@ type LinksPagesAdminProps = {
 };
 
 export function LinksPagesAdmin({ pages, qrCodesByPageId }: LinksPagesAdminProps) {
+  const router = useRouter();
   const dialog = useAdminFormDialog();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDelete(page: LinkPageWithContent) {
+    if (!confirm(`Delete "${page.title}" and its QR code? This cannot be undone.`)) return;
+    setDeletingId(page.id);
+    const result = await deleteLinkPage(page.id);
+    setDeletingId(null);
+    if (result.success) router.refresh();
+  }
 
   return (
     <>
@@ -92,6 +105,16 @@ export function LinksPagesAdmin({ pages, qrCodesByPageId }: LinksPagesAdminProps
                             </Link>
                           </Button>
                         )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          disabled={deletingId === page.id}
+                          onClick={() => handleDelete(page)}
+                        >
+                          {deletingId === page.id ? "Deleting..." : "Delete"}
+                        </Button>
                       </div>
                     </td>
                   </tr>

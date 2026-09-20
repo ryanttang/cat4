@@ -311,13 +311,80 @@ export async function createSurveyResponse(data: {
 
 export async function getSurveyResponses(surveyId: string) {
   if (isMockDataMode()) {
-    return mockStore.surveyResponses.filter((r) => r.surveyId === surveyId);
+    return mockStore.surveyResponses
+      .filter((r) => r.surveyId === surveyId)
+      .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime());
   }
 
   return getDb()
     .select()
     .from(surveyResponses)
-    .where(eq(surveyResponses.surveyId, surveyId));
+    .where(eq(surveyResponses.surveyId, surveyId))
+    .orderBy(desc(surveyResponses.submittedAt));
+}
+
+export const SURVEY_RESPONSE_LIST_LIMIT = 500;
+
+export type SurveyResponseDetail = {
+  id: string;
+  respondentEmail: string | null;
+  submittedAt: Date;
+  answersByQuestionId: Record<string, unknown>;
+};
+
+export async function getSurveyResponseDetails(
+  surveyId: string,
+  limit = SURVEY_RESPONSE_LIST_LIMIT
+): Promise<SurveyResponseDetail[]> {
+  if (isMockDataMode()) {
+    return mockStore.surveyResponses
+      .filter((response) => response.surveyId === surveyId)
+      .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime())
+      .slice(0, limit)
+      .map((response) => ({
+        id: response.id,
+        respondentEmail: response.respondentEmail,
+        submittedAt: response.submittedAt,
+        answersByQuestionId: Object.fromEntries(
+          mockStore.surveyAnswers
+            .filter((answer) => answer.responseId === response.id)
+            .map((answer) => [answer.questionId, answer.answer])
+        ),
+      }));
+  }
+
+  const responses = await getDb()
+    .select()
+    .from(surveyResponses)
+    .where(eq(surveyResponses.surveyId, surveyId))
+    .orderBy(desc(surveyResponses.submittedAt))
+    .limit(limit);
+
+  if (responses.length === 0) return [];
+
+  const answers = await getDb()
+    .select()
+    .from(surveyAnswers)
+    .where(
+      inArray(
+        surveyAnswers.responseId,
+        responses.map((response) => response.id)
+      )
+    );
+
+  const answersByResponse = new Map<string, Record<string, unknown>>();
+  for (const answer of answers) {
+    const current = answersByResponse.get(answer.responseId) ?? {};
+    current[answer.questionId] = answer.answer;
+    answersByResponse.set(answer.responseId, current);
+  }
+
+  return responses.map((response) => ({
+    id: response.id,
+    respondentEmail: response.respondentEmail,
+    submittedAt: response.submittedAt,
+    answersByQuestionId: answersByResponse.get(response.id) ?? {},
+  }));
 }
 
 export async function getSurveyAnswersBySurveyId(surveyId: string) {

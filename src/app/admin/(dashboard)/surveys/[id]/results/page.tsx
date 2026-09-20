@@ -22,8 +22,15 @@ export default async function SurveyResultsPage({ params }: Props) {
           Back to Surveys
         </Link>
       </Button>
-      <h1 className="text-3xl font-bold">{survey.title} — Live Results</h1>
-      <p className="mt-1 text-muted-foreground">Admin view with live updates</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">{survey.title} — Live Results</h1>
+          <p className="mt-1 text-muted-foreground">Admin view with live updates</p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/admin/surveys/${survey.id}/responses`}>Responses</Link>
+        </Button>
+      </div>
 
       <div className="mt-8">
         <LiveResults
