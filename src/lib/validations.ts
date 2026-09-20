@@ -294,12 +294,20 @@ export const homepageSchema = z.object({
 
 export const linksButtonSchema = z.object({
   id: z.string().min(1),
-  type: z.enum(["url", "product", "survey", "poll", "subscribe"]),
-  label: z.string().min(1),
+  type: z.enum(["url", "product", "survey", "poll", "subscribe", "spacer"]),
+  label: z.string(),
   enabled: z.boolean(),
   url: z.string().optional(),
   productId: z.string().optional(),
   surveyId: z.string().optional(),
+}).superRefine((button, ctx) => {
+  if (button.type !== "spacer" && !button.label.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Label is required",
+      path: ["label"],
+    });
+  }
 });
 
 export const linkPageCreateSchema = z.object({
@@ -321,6 +329,7 @@ export const linksPageSchema = z.object({
     title: z.string().min(1),
     bio: z.string(),
     heroImageUrl: z.string(),
+    logoImageUrl: z.string(),
     heroStyle: z.enum(["avatar", "banner"]),
     backgroundStyle: z.enum(["brand", "image"]),
     backgroundImageUrl: z.string(),

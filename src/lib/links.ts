@@ -14,6 +14,7 @@ export const LINKS_BUTTON_TYPES = [
   "survey",
   "poll",
   "subscribe",
+  "spacer",
 ] as const;
 
 export type LinksButtonType = (typeof LINKS_BUTTON_TYPES)[number];
@@ -24,6 +25,7 @@ export const LINKS_BUTTON_TYPE_LABELS: Record<LinksButtonType, string> = {
   survey: "Survey",
   poll: "Poll",
   subscribe: "Subscribe",
+  spacer: "Space",
 };
 
 export type LinksButton = {
@@ -46,6 +48,7 @@ export type LinksPageContent = {
     title: string;
     bio: string;
     heroImageUrl: string;
+    logoImageUrl: string;
     heroStyle: "avatar" | "banner";
     backgroundStyle: "brand" | "image";
     backgroundImageUrl: string;
@@ -116,6 +119,7 @@ export const DEFAULT_LINKS_PAGE_CONTENT: LinksPageContent = {
     title: brand.name,
     bio: brand.tagline,
     heroImageUrl: "",
+    logoImageUrl: "",
     heroStyle: "banner",
     backgroundStyle: "brand",
     backgroundImageUrl: "",
@@ -181,12 +185,18 @@ export function resolveLinksButtons(
   deps: {
     productsById: Map<string, { category: string; slug: string; published: boolean }>;
     surveysById: Map<string, { slug: string; type: Survey["type"]; status: string }>;
+    includeUnresolved?: boolean;
   }
 ): ResolvedLinksButton[] {
   const resolved: ResolvedLinksButton[] = [];
 
   for (const button of buttons) {
-    if (!button.enabled || !button.label.trim()) continue;
+    if (!button.enabled) continue;
+    if (button.type === "spacer") {
+      resolved.push({ id: button.id, type: "spacer", label: "" });
+      continue;
+    }
+    if (!button.label.trim()) continue;
 
     if (button.type === "subscribe") {
       resolved.push({ id: button.id, type: "subscribe", label: button.label });
@@ -202,7 +212,12 @@ export function resolveLinksButtons(
 
     if (button.type === "product") {
       const product = button.productId ? deps.productsById.get(button.productId) : undefined;
-      if (!product?.published) continue;
+      if (!product?.published) {
+        if (deps.includeUnresolved) {
+          resolved.push({ id: button.id, type: "product", label: button.label });
+        }
+        continue;
+      }
       resolved.push({
         id: button.id,
         type: "product",
@@ -214,15 +229,22 @@ export function resolveLinksButtons(
 
     if (button.type === "survey" || button.type === "poll") {
       const survey = button.surveyId ? deps.surveysById.get(button.surveyId) : undefined;
-      if (!survey || survey.status !== "published") continue;
-      const isPoll = survey.type === "poll";
-      if (button.type === "poll" && !isPoll) continue;
-      if (button.type === "survey" && isPoll) continue;
+      const isPoll = survey?.type === "poll";
+      const matchesType =
+        Boolean(survey) &&
+        survey.status === "published" &&
+        (button.type === "poll" ? isPoll : !isPoll);
+      if (!matchesType) {
+        if (deps.includeUnresolved) {
+          resolved.push({ id: button.id, type: button.type, label: button.label });
+        }
+        continue;
+      }
       resolved.push({
         id: button.id,
         type: button.type,
         label: button.label,
-        href: surveyPageHref(survey),
+        href: surveyPageHref(survey!),
       });
     }
   }
@@ -254,14 +276,19 @@ export function resolveLinksProducts(
 export function buildLinksPageViewModel(
   content: LinksPageContent,
   products: Product[],
-  surveys: Survey[]
+  surveys: Survey[],
+  options?: { includeUnresolvedButtons?: boolean }
 ): LinksPageViewModel {
   const productsById = new Map(products.map((product) => [product.id, product]));
   const surveysById = new Map(surveys.map((survey) => [survey.id, survey]));
 
   return {
     content,
-    buttons: resolveLinksButtons(content.buttons, { productsById, surveysById }),
+    buttons: resolveLinksButtons(content.buttons, {
+      productsById,
+      surveysById,
+      includeUnresolved: options?.includeUnresolvedButtons,
+    }),
     products: content.products.enabled
       ? resolveLinksProducts(content.products.productIds, productsById)
       : [],

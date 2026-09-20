@@ -75,7 +75,7 @@ export function LinksPageForm({
     [surveys, polls]
   );
   const preview = useMemo(
-    () => buildLinksPageViewModel(content, products, catalog),
+    () => buildLinksPageViewModel(content, products, catalog, { includeUnresolvedButtons: true }),
     [content, products, catalog]
   );
 
@@ -255,6 +255,26 @@ export function LinksPageForm({
                   Remove hero image
                 </Button>
               )}
+              <FileUpload
+                label="Logo"
+                accept="image/*"
+                value={content.appearance.logoImageUrl}
+                onChange={(url) => updateAppearance("logoImageUrl", url)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Sits below the hero and above the title. PNG with a transparent background
+                works best, around 400×400.
+              </p>
+              {content.appearance.logoImageUrl && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateAppearance("logoImageUrl", "")}
+                >
+                  Remove logo
+                </Button>
+              )}
               <div>
                 <Label>Background</Label>
                 <Select
@@ -288,8 +308,9 @@ export function LinksPageForm({
               <div>
                 <h2 className="text-lg font-semibold">Buttons</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Add custom URLs, products, surveys, polls, or a subscribe modal. Disabled
-                  buttons stay saved but hidden on the public page.
+                  Add custom URLs, products, surveys, polls, a subscribe modal, or a blank
+                  space between buttons. Disabled items stay saved but hidden on the public
+                  page.
                 </p>
               </div>
 
@@ -300,7 +321,7 @@ export function LinksPageForm({
                       <Switch
                         checked={button.enabled}
                         onCheckedChange={(enabled) => updateButton(index, { enabled })}
-                        aria-label={`Show ${button.label || "button"}`}
+                        aria-label={`Show ${button.label || (button.type === "spacer" ? "space" : "button")}`}
                       />
                       <span className="text-sm text-muted-foreground">Visible</span>
                     </div>
@@ -353,21 +374,27 @@ export function LinksPageForm({
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <Label>Label</Label>
-                      <Input
-                        value={button.label}
-                        onChange={(e) => updateButton(index, { label: e.target.value })}
-                        className="mt-1"
-                      />
-                    </div>
+                    {button.type !== "spacer" && (
+                      <div>
+                        <Label>Label</Label>
+                        <Input
+                          value={button.label}
+                          onChange={(e) => updateButton(index, { label: e.target.value })}
+                          className="mt-1"
+                        />
+                      </div>
+                    )}
                     <div>
                       <Label>Type</Label>
                       <Select
                         value={button.type}
-                        onValueChange={(value) =>
-                          updateButton(index, { type: value as LinksButtonType })
-                        }
+                        onValueChange={(value) => {
+                          const type = value as LinksButtonType;
+                          updateButton(index, {
+                            type,
+                            label: type === "spacer" ? "" : button.label || "New button",
+                          });
+                        }}
                       >
                         <SelectTrigger className="mt-1">
                           <SelectValue />
@@ -477,23 +504,44 @@ export function LinksPageForm({
                       Opens the subscribe form modal. Edit copy in the Subscribe tab.
                     </p>
                   )}
+                  {button.type === "spacer" && (
+                    <p className="text-sm text-muted-foreground">
+                      Adds an invisible gap between buttons on the public page.
+                    </p>
+                  )}
                 </div>
               ))}
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setContent((prev) => ({
-                    ...prev,
-                    buttons: [...prev.buttons, createLinksButton()],
-                  }))
-                }
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Add button
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setContent((prev) => ({
+                      ...prev,
+                      buttons: [...prev.buttons, createLinksButton()],
+                    }))
+                  }
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Add button
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setContent((prev) => ({
+                      ...prev,
+                      buttons: [...prev.buttons, createLinksButton({ type: "spacer", label: "" })],
+                    }))
+                  }
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Add space
+                </Button>
+              </div>
             </section>
           </TabsContent>
 

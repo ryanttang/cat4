@@ -68,6 +68,7 @@ describe("links page helpers", () => {
 
     expect(merged.appearance.title).toBe("Bio");
     expect(merged.appearance.bio).toBe(DEFAULT_LINKS_PAGE_CONTENT.appearance.bio);
+    expect(merged.appearance.logoImageUrl).toBe("");
     expect(merged.buttons).toEqual([]);
     expect(merged.published).toBe(true);
   });
@@ -102,6 +103,8 @@ describe("links page helpers", () => {
         surveyId: "00000000-0000-4000-8000-000000000201",
       },
       { id: "7", type: "subscribe", label: "Join", enabled: true },
+      { id: "8", type: "spacer", label: "", enabled: true },
+      { id: "9", type: "spacer", label: "", enabled: false },
     ];
 
     const resolved = resolveLinksButtons(buttons, {
@@ -120,7 +123,7 @@ describe("links page helpers", () => {
       ]),
     });
 
-    expect(resolved.map((button) => button.id)).toEqual(["1", "3", "5", "7"]);
+    expect(resolved.map((button) => button.id)).toEqual(["1", "3", "5", "7", "8"]);
     expect(resolved[2]?.href).toBe("/survey/flavor-survey");
     expect(resolved[3]?.href).toBeUndefined();
   });

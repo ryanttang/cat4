@@ -3,9 +3,52 @@
 import { useState } from "react";
 import Link from "next/link";
 import { brand } from "@/lib/brand";
-import { isExternalHref, type LinksPageViewModel } from "@/lib/links";
+import {
+  isExternalHref,
+  type LinksButtonType,
+  type LinksPageViewModel,
+} from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { LinksSubscribeModal } from "@/components/marketing/links-subscribe-modal";
+
+function linksButtonClassName(
+  type: LinksButtonType,
+  buttonStyle: "filled" | "outline"
+) {
+  const base =
+    "block w-full px-6 py-4 text-center text-base font-semibold transition-colors";
+
+  switch (type) {
+    case "product":
+      return cn(
+        base,
+        "rounded-xl border border-white/15 bg-cat4-surface text-cat4-light hover:border-cat4-blue/50 hover:bg-cat4-surface/80"
+      );
+    case "survey":
+      return cn(
+        base,
+        "rounded-lg border-2 border-cat4-light/35 bg-transparent text-cat4-light hover:bg-cat4-light/10"
+      );
+    case "poll":
+      return cn(
+        base,
+        "rounded-full border border-cat4-light/15 bg-cat4-light/10 text-cat4-light hover:bg-cat4-light/20"
+      );
+    case "subscribe":
+      return cn(
+        base,
+        "rounded-2xl bg-cat4-light text-cat4-dark hover:bg-cat4-light/90"
+      );
+    default:
+      return cn(
+        base,
+        "rounded-2xl",
+        buttonStyle === "outline"
+          ? "border border-cat4-blue/40 bg-transparent text-cat4-light hover:bg-cat4-blue/15"
+          : "bg-cat4-blue text-cat4-light hover:bg-cat4-blue/90"
+      );
+  }
+}
 
 type LinksPageViewProps = {
   view: LinksPageViewModel;
@@ -20,11 +63,12 @@ export function LinksPageView({ view, preview = false }: LinksPageViewProps) {
     appearance.backgroundStyle === "image" && Boolean(appearance.backgroundImageUrl);
   const showProducts = content.products.enabled && products.length > 0;
   const hasSubscribe = buttons.some((button) => button.type === "subscribe");
+  const showBanner = appearance.heroStyle === "banner" && Boolean(appearance.heroImageUrl);
 
   return (
     <div
       className={cn(
-        "relative min-h-screen overflow-hidden px-4 py-12 sm:py-16",
+        "relative overflow-hidden",
         preview ? "min-h-full" : "min-h-screen"
       )}
       style={
@@ -43,28 +87,44 @@ export function LinksPageView({ view, preview = false }: LinksPageViewProps) {
         </div>
       )}
 
-      <div className="relative mx-auto w-full max-w-md text-center">
-        {appearance.heroStyle === "banner" && appearance.heroImageUrl ? (
-          <div className="mb-8 overflow-hidden rounded-3xl border border-cat4-blue/20">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={appearance.heroImageUrl}
-              alt=""
-              className="aspect-[3/1] h-auto w-full object-cover"
-            />
-          </div>
-        ) : appearance.heroImageUrl ? (
+      {showBanner ? (
+        <div className="relative mb-8 w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={appearance.heroImageUrl}
+            alt=""
+            className="aspect-[3/1] h-auto w-full object-cover"
+          />
+        </div>
+      ) : null}
+
+      <div
+        className={cn(
+          "relative mx-auto w-full max-w-md px-4 pb-12 text-center",
+          showBanner ? "" : "pt-12 sm:pt-16"
+        )}
+      >
+        {!showBanner && appearance.heroImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={appearance.heroImageUrl}
             alt=""
             className="mx-auto mb-6 h-28 w-28 rounded-full object-cover ring-4 ring-cat4-blue/30"
           />
-        ) : (
+        ) : !showBanner && !appearance.logoImageUrl ? (
           <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-full bg-cat4-blue text-4xl font-bold text-cat4-light ring-4 ring-cat4-blue/30">
             {appearance.title.trim().charAt(0) || brand.name.charAt(0)}
           </div>
-        )}
+        ) : null}
+
+        {appearance.logoImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={appearance.logoImageUrl}
+            alt=""
+            className="mx-auto mb-5 h-16 w-auto max-w-[200px] object-contain"
+          />
+        ) : null}
 
         <h1 className="text-3xl font-bold tracking-tight text-cat4-light">{appearance.title}</h1>
         {appearance.bio.trim() && (
@@ -75,12 +135,17 @@ export function LinksPageView({ view, preview = false }: LinksPageViewProps) {
 
         <div className="mt-10 space-y-3">
           {buttons.map((button) => {
-            const className = cn(
-              "block w-full rounded-2xl px-6 py-4 text-center text-base font-semibold transition-colors",
-              appearance.buttonStyle === "outline"
-                ? "border border-cat4-blue/40 bg-transparent text-cat4-light hover:bg-cat4-blue/15"
-                : "bg-cat4-blue text-cat4-light hover:bg-cat4-blue/90"
-            );
+            if (button.type === "spacer") {
+              return (
+                <div
+                  key={button.id}
+                  aria-hidden
+                  className={preview ? "h-8 rounded-lg border border-dashed border-white/20" : "h-8"}
+                />
+              );
+            }
+
+            const className = linksButtonClassName(button.type, appearance.buttonStyle);
 
             if (button.type === "subscribe") {
               return (
@@ -95,7 +160,14 @@ export function LinksPageView({ view, preview = false }: LinksPageViewProps) {
               );
             }
 
-            if (!button.href) return null;
+            if (!button.href) {
+              if (!preview) return null;
+              return (
+                <div key={button.id} className={className}>
+                  {button.label}
+                </div>
+              );
+            }
 
             if (isExternalHref(button.href)) {
               return (
