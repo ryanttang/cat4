@@ -243,7 +243,7 @@ export function LinksPageForm({
                 onChange={(url) => updateAppearance("heroImageUrl", url)}
               />
               <p className="text-xs text-muted-foreground">
-                Wide banner looks best at 1200×600. Avatar works as a centered square, 800×800.
+                Wide banner looks best at 1200×400. Avatar works as a centered square, 800×800.
               </p>
               {content.appearance.heroImageUrl && (
                 <Button

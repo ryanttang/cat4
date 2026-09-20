@@ -50,7 +50,7 @@ export function LinksPageView({ view, preview = false }: LinksPageViewProps) {
             <img
               src={appearance.heroImageUrl}
               alt=""
-              className="h-48 w-full object-cover sm:h-56"
+              className="aspect-[3/1] h-auto w-full object-cover"
             />
           </div>
         ) : appearance.heroImageUrl ? (
