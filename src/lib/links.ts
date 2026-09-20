@@ -116,7 +116,7 @@ export const DEFAULT_LINKS_PAGE_CONTENT: LinksPageContent = {
     title: brand.name,
     bio: brand.tagline,
     heroImageUrl: "",
-    heroStyle: "avatar",
+    heroStyle: "banner",
     backgroundStyle: "brand",
     backgroundImageUrl: "",
     buttonStyle: "filled",

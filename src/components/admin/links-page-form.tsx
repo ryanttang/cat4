@@ -213,8 +213,8 @@ export function LinksPageForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="avatar">Circular avatar</SelectItem>
                       <SelectItem value="banner">Wide banner</SelectItem>
+                      <SelectItem value="avatar">Circular avatar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -242,6 +242,9 @@ export function LinksPageForm({
                 value={content.appearance.heroImageUrl}
                 onChange={(url) => updateAppearance("heroImageUrl", url)}
               />
+              <p className="text-xs text-muted-foreground">
+                Wide banner looks best at 1200×600. Avatar works as a centered square, 800×800.
+              </p>
               {content.appearance.heroImageUrl && (
                 <Button
                   type="button"
