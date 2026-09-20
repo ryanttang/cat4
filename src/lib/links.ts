@@ -230,11 +230,11 @@ export function resolveLinksButtons(
     if (button.type === "survey" || button.type === "poll") {
       const survey = button.surveyId ? deps.surveysById.get(button.surveyId) : undefined;
       const isPoll = survey?.type === "poll";
-      const matchesType =
-        Boolean(survey) &&
-        survey.status === "published" &&
-        (button.type === "poll" ? isPoll : !isPoll);
-      if (!matchesType) {
+      if (
+        !survey ||
+        survey.status !== "published" ||
+        (button.type === "poll" ? !isPoll : isPoll)
+      ) {
         if (deps.includeUnresolved) {
           resolved.push({ id: button.id, type: button.type, label: button.label });
         }
@@ -244,7 +244,7 @@ export function resolveLinksButtons(
         id: button.id,
         type: button.type,
         label: button.label,
-        href: surveyPageHref(survey!),
+        href: surveyPageHref(survey),
       });
     }
   }
