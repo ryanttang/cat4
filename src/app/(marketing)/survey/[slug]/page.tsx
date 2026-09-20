@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getSurveyBySlug, getSurveyQuestions } from "@/lib/data";
+import { resolveSurveyPublicCopy } from "@/lib/surveys/constants";
 import { SurveyForm } from "@/components/marketing/survey-form";
 import { SectionLabel } from "@/components/marketing/section-label";
 import Link from "next/link";
@@ -20,12 +21,13 @@ export default async function SurveyPage({ params }: Props) {
   if (survey.type === "poll") redirect(`/poll/${survey.slug}`);
 
   const questions = await getSurveyQuestions(survey.id);
+  const copy = resolveSurveyPublicCopy(survey);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
       <SectionLabel>{survey.type}</SectionLabel>
-      <h1 className="mt-3 text-4xl font-bold text-cat4-light">{survey.title}</h1>
-      {survey.description && <p className="mt-3 text-lg text-cat4-light/70">{survey.description}</p>}
+      <h1 className="mt-3 text-4xl font-bold text-cat4-light">{copy.headline}</h1>
+      {copy.subtext && <p className="mt-3 text-lg text-cat4-light/70">{copy.subtext}</p>}
 
       {survey.publicResultsEnabled && (
         <p className="mt-4 text-sm text-cat4-light/60">

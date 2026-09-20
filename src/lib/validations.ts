@@ -28,13 +28,16 @@ export const landingEntrySchema = z.object({
 
 export const surveySubmitSchema = z.object({
   surveyId: z.string().uuid(),
-  email: z.string().email().optional(),
+  email: z.string().email().optional().or(z.literal("")),
   answers: z.array(
     z.object({
       questionId: z.string().uuid(),
       answer: z.any(),
     })
   ),
+  profile: z.record(z.string()).optional(),
+  consentParticipation: z.boolean().optional(),
+  consentMarketing: z.boolean().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 
@@ -116,10 +119,28 @@ export const landingPageSchema = z.object({
   endsAt: z.string().optional().nullable(),
 });
 
+const surveyProfileFieldSchema = z.object({
+  id: z.string().min(1),
+  key: z.string().min(1),
+  label: z.string().min(1),
+  type: z.enum(["text", "tel", "email", "textarea"]),
+  required: z.boolean(),
+});
+
 const surveySettingsSchema = z.object({
   allowMultipleVotes: z.boolean().optional(),
   anonymousOnly: z.boolean().optional(),
   resultsRefreshSeconds: z.number().int().min(3).max(60).optional(),
+  headline: z.string().optional(),
+  subtext: z.string().optional(),
+  disclaimerText: z.string().optional(),
+  emailLabel: z.string().optional(),
+  participationConsentEnabled: z.boolean().optional(),
+  participationConsentText: z.string().optional(),
+  marketingConsentEnabled: z.boolean().optional(),
+  marketingConsentText: z.string().optional(),
+  marketingConsentRequired: z.boolean().optional(),
+  profileFields: z.array(surveyProfileFieldSchema).optional(),
 });
 
 export const surveySchema = z.object({

@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { surveySubmitAction } from "@/lib/actions/public";
 import { QuestionField } from "@/components/surveys/question-field";
-import { isSurveyActive } from "@/lib/surveys/constants";
+import { isSurveyActive, resolveSurveyPublicCopy, validateSurveyIntake } from "@/lib/surveys/constants";
 import type { Survey, SurveyQuestion } from "@/lib/db/schema";
 
 type SurveyFormProps = {
@@ -30,7 +31,11 @@ function validateAnswers(questions: SurveyQuestion[], answers: Record<string, un
 }
 
 export function SurveyForm({ survey, questions }: SurveyFormProps) {
+  const copy = resolveSurveyPublicCopy(survey);
   const [email, setEmail] = useState("");
+  const [profile, setProfile] = useState<Record<string, string>>({});
+  const [consentParticipation, setConsentParticipation] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -43,6 +48,18 @@ export function SurveyForm({ survey, questions }: SurveyFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    const intakeError = validateSurveyIntake(survey, {
+      email,
+      profile,
+      consentParticipation,
+      consentMarketing,
+    });
+    if (intakeError) {
+      setStatus("error");
+      setErrorMsg(intakeError);
+      return;
+    }
 
     const validationError = validateAnswers(questions, answers);
     if (validationError) {
@@ -61,6 +78,9 @@ export function SurveyForm({ survey, questions }: SurveyFormProps) {
     const result = await surveySubmitAction({
       surveyId: survey.id,
       email: survey.emailRequired ? email : email || undefined,
+      profile,
+      consentParticipation,
+      consentMarketing,
       answers: answerList,
     });
 
@@ -96,17 +116,42 @@ export function SurveyForm({ survey, questions }: SurveyFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {survey.emailRequired && (
-        <div>
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1"
-          />
+      {(survey.emailRequired || copy.profileFields.length > 0) && (
+        <div className="space-y-4">
+          {survey.emailRequired && (
+            <div>
+              <Label htmlFor="email">{copy.emailLabel} *</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          )}
+          {copy.profileFields.map((field) => {
+            const FieldInput = field.type === "textarea" ? Textarea : Input;
+            return (
+              <div key={field.id}>
+                <Label htmlFor={`profile-${field.key}`}>
+                  {field.label}
+                  {field.required ? " *" : ""}
+                </Label>
+                <FieldInput
+                  id={`profile-${field.key}`}
+                  type={field.type === "textarea" ? undefined : field.type}
+                  required={field.required}
+                  value={profile[field.key] ?? ""}
+                  onChange={(e) =>
+                    setProfile((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  }
+                  className="mt-1"
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -120,6 +165,42 @@ export function SurveyForm({ survey, questions }: SurveyFormProps) {
           variant="survey"
         />
       ))}
+
+      {(copy.disclaimerText ||
+        copy.participationConsentEnabled ||
+        copy.marketingConsentEnabled) && (
+        <div className="space-y-4">
+          {copy.disclaimerText && (
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-cat4-light/70">
+              {copy.disclaimerText}
+            </p>
+          )}
+          {copy.participationConsentEnabled && (
+            <label className="flex items-start gap-2 text-sm text-cat4-light/80">
+              <input
+                type="checkbox"
+                checked={consentParticipation}
+                onChange={(e) => setConsentParticipation(e.target.checked)}
+                className="mt-1"
+                required
+              />
+              <span>{copy.participationConsentText}</span>
+            </label>
+          )}
+          {copy.marketingConsentEnabled && (
+            <label className="flex items-start gap-2 text-sm text-cat4-light/80">
+              <input
+                type="checkbox"
+                checked={consentMarketing}
+                onChange={(e) => setConsentMarketing(e.target.checked)}
+                className="mt-1"
+                required={copy.marketingConsentRequired}
+              />
+              <span>{copy.marketingConsentText}</span>
+            </label>
+          )}
+        </div>
+      )}
 
       {status === "error" && <p className="text-sm text-red-600">{errorMsg}</p>}
 

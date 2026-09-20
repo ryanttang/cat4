@@ -18,6 +18,7 @@ import {
   getQrCodeById,
   generateRewardCode,
 } from "@/lib/data";
+import { validateSurveyIntake } from "@/lib/surveys/constants";
 import type { QrDestinationConfig } from "@/lib/db/schema";
 import type { z } from "zod";
 
@@ -108,7 +109,8 @@ export async function surveySubmitAction(data: z.infer<typeof surveySubmitSchema
     return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
   }
 
-  const { surveyId, email, answers, metadata } = parsed.data;
+  const { surveyId, email, answers, profile, consentParticipation, consentMarketing, metadata } =
+    parsed.data;
 
   try {
     const { getSurveyById } = await import("@/lib/data");
@@ -117,15 +119,61 @@ export async function surveySubmitAction(data: z.infer<typeof surveySubmitSchema
       return { success: false, error: "Survey not found" };
     }
 
+    const intakeError = validateSurveyIntake(survey, {
+      email,
+      profile,
+      consentParticipation,
+      consentMarketing,
+    });
+    if (intakeError) {
+      return { success: false, error: intakeError };
+    }
+
+    const normalizedEmail = email?.trim().toLowerCase() || undefined;
+    const profileValues = Object.fromEntries(
+      Object.entries(profile ?? {}).map(([key, value]) => [key, value.trim()])
+    );
+
     await createSurveyResponse({
       surveyId,
-      email,
-      metadata: metadata ?? null,
+      email: normalizedEmail,
+      metadata: {
+        ...(metadata ?? {}),
+        profile: profileValues,
+        consentParticipation: Boolean(consentParticipation),
+        consentMarketing: Boolean(consentMarketing),
+      },
       answers: answers.map(({ questionId, answer }) => ({
         questionId,
         answer: answer ?? null,
       })),
     });
+
+    if (normalizedEmail) {
+      await createCapture({
+        sourceType: "survey",
+        sourceId: surveyId,
+        email: normalizedEmail,
+        firstName: profileValues.firstName || null,
+        lastName: profileValues.lastName || null,
+        consentMarketing: Boolean(consentMarketing),
+        metadata: { profile: profileValues, surveySlug: survey.slug },
+      });
+
+      if (consentMarketing) {
+        const existing = await findSubscriberByEmail(normalizedEmail);
+        if (!existing) {
+          await createSubscriber({
+            email: normalizedEmail,
+            firstName: profileValues.firstName || null,
+            lastName: profileValues.lastName || null,
+            consentMarketing: true,
+            source: "survey",
+          });
+        }
+      }
+    }
+
     return { success: true };
   } catch {
     return { success: false, error: "Something went wrong. Please try again." };

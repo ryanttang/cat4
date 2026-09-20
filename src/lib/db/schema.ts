@@ -345,10 +345,28 @@ export const landingPageEntriesRelations = relations(landingPageEntries, ({ one 
 
 // ─── Surveys ─────────────────────────────────────────────────────────────────
 
+export type SurveyProfileField = {
+  id: string;
+  key: string;
+  label: string;
+  type: "text" | "tel" | "email" | "textarea";
+  required: boolean;
+};
+
 export type SurveySettings = {
   allowMultipleVotes?: boolean;
   anonymousOnly?: boolean;
   resultsRefreshSeconds?: number;
+  headline?: string;
+  subtext?: string;
+  disclaimerText?: string;
+  emailLabel?: string;
+  participationConsentEnabled?: boolean;
+  participationConsentText?: string;
+  marketingConsentEnabled?: boolean;
+  marketingConsentText?: string;
+  marketingConsentRequired?: boolean;
+  profileFields?: SurveyProfileField[];
 };
 
 export const surveys = pgTable("surveys", {

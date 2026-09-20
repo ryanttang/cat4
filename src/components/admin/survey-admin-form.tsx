@@ -10,9 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createSurvey, updateSurvey, addSurveyQuestion, deleteSurveyQuestion } from "@/lib/actions/admin";
-import { SURVEY_CONTENT_TYPES, QUESTION_TYPES, questionNeedsOptions } from "@/lib/surveys/constants";
+import {
+  SURVEY_CONTENT_TYPES,
+  SURVEY_PROFILE_FIELD_PRESETS,
+  QUESTION_TYPES,
+  createSurveyProfileField,
+  defaultSurveySettingsForCreate,
+  mergeSurveySettings,
+  questionNeedsOptions,
+} from "@/lib/surveys/constants";
 import { slugify, formatDateTime } from "@/lib/utils";
-import type { Survey, SurveyQuestion } from "@/lib/db/schema";
+import type { Survey, SurveyProfileField, SurveyQuestion } from "@/lib/db/schema";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
 import { adminPanelClass } from "@/components/admin/admin-ui";
 import type { AdminDialogFormProps } from "@/components/admin/admin-form-dialog";
@@ -51,7 +59,42 @@ export function SurveyAdminForm({
   const [showResultsAfterVote, setShowResultsAfterVote] = useState(survey?.showResultsAfterVote ?? false);
   const [startsAt, setStartsAt] = useState(toDatetimeLocal(survey?.startsAt));
   const [endsAt, setEndsAt] = useState(toDatetimeLocal(survey?.endsAt));
+  const [settings, setSettings] = useState(() =>
+    mergeSurveySettings(survey ? survey.settings : defaultSurveySettingsForCreate())
+  );
   const [loading, setLoading] = useState(false);
+
+  function updateSetting<K extends keyof typeof settings>(key: K, value: (typeof settings)[K]) {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function addProfileField(preset?: Pick<SurveyProfileField, "key" | "label" | "type">) {
+    setSettings((prev) => {
+      if (preset && prev.profileFields.some((field) => field.key === preset.key)) {
+        return prev;
+      }
+      return {
+        ...prev,
+        profileFields: [...prev.profileFields, createSurveyProfileField(preset)],
+      };
+    });
+  }
+
+  function updateProfileField(id: string, patch: Partial<SurveyProfileField>) {
+    setSettings((prev) => ({
+      ...prev,
+      profileFields: prev.profileFields.map((field) =>
+        field.id === id ? { ...field, ...patch } : field
+      ),
+    }));
+  }
+
+  function removeProfileField(id: string) {
+    setSettings((prev) => ({
+      ...prev,
+      profileFields: prev.profileFields.filter((field) => field.id !== id),
+    }));
+  }
 
   const [qText, setQText] = useState("");
   const [qType, setQType] = useState<SurveyQuestion["type"]>("single_choice");
@@ -70,6 +113,7 @@ export function SurveyAdminForm({
       emailRequired,
       publicResultsEnabled,
       showResultsAfterVote,
+      settings,
       startsAt: startsAt || null,
       endsAt: endsAt || null,
     };
@@ -86,7 +130,7 @@ export function SurveyAdminForm({
           emailRequired,
           publicResultsEnabled,
           showResultsAfterVote,
-          settings: {},
+          settings,
           startsAt: startsAt ? new Date(startsAt) : null,
           endsAt: endsAt ? new Date(endsAt) : null,
           createdById: null,
@@ -189,6 +233,36 @@ export function SurveyAdminForm({
         <div>
           <Label>Description</Label>
           <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Internal / fallback subtext if the public subtext below is empty.
+          </p>
+        </div>
+        <div>
+          <Label>Header</Label>
+          <Input
+            value={settings.headline}
+            onChange={(e) => updateSetting("headline", e.target.value)}
+            className="mt-1"
+            placeholder={title || "Shown at the top of the public survey"}
+          />
+        </div>
+        <div>
+          <Label>Subtext</Label>
+          <Textarea
+            value={settings.subtext}
+            onChange={(e) => updateSetting("subtext", e.target.value)}
+            className="mt-1"
+            placeholder="Short intro under the header"
+          />
+        </div>
+        <div>
+          <Label>Disclaimer</Label>
+          <Textarea
+            value={settings.disclaimerText}
+            onChange={(e) => updateSetting("disclaimerText", e.target.value)}
+            className="mt-1"
+            placeholder="Optional legal or prize disclaimer shown above the consent boxes"
+          />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -205,6 +279,17 @@ export function SurveyAdminForm({
             <Switch checked={emailRequired} onCheckedChange={setEmailRequired} />
             <Label>Email Required</Label>
           </div>
+          {emailRequired && (
+            <div>
+              <Label>Email field label</Label>
+              <Input
+                value={settings.emailLabel}
+                onChange={(e) => updateSetting("emailLabel", e.target.value)}
+                className="mt-1"
+                placeholder="Email"
+              />
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Switch checked={publicResultsEnabled} onCheckedChange={setPublicResultsEnabled} />
             <Label>Public Live Results Page</Label>
@@ -213,6 +298,121 @@ export function SurveyAdminForm({
             <Switch checked={showResultsAfterVote} onCheckedChange={setShowResultsAfterVote} />
             <Label>Show Results After Submission</Label>
           </div>
+        </div>
+
+        <div className="space-y-4 rounded-md border border-border p-4">
+          <div>
+            <h3 className="text-sm font-semibold">Contact fields</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Collected next to email and stored with each response. Labels are shown on the
+              public form.
+            </p>
+          </div>
+          {settings.profileFields.map((field) => (
+            <div key={field.id} className="grid gap-3 rounded-md border border-border p-3 sm:grid-cols-[1fr_8rem_auto]">
+              <div>
+                <Label>Label</Label>
+                <Input
+                  value={field.label}
+                  onChange={(e) => {
+                    const label = e.target.value;
+                    const isPreset = SURVEY_PROFILE_FIELD_PRESETS.some((preset) => preset.key === field.key);
+                    updateProfileField(field.id, {
+                      label,
+                      key: isPreset ? field.key : slugify(label) || field.key,
+                    });
+                  }}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex items-end gap-2 pb-1">
+                <Switch
+                  checked={field.required}
+                  onCheckedChange={(required) => updateProfileField(field.id, { required })}
+                />
+                <Label>Required</Label>
+              </div>
+              <div className="flex items-end">
+                <Button type="button" variant="ghost" size="icon" onClick={() => removeProfileField(field.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-wrap gap-2">
+            {SURVEY_PROFILE_FIELD_PRESETS.map((preset) => (
+              <Button
+                key={preset.key}
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={settings.profileFields.some((field) => field.key === preset.key)}
+                onClick={() => addProfileField(preset)}
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                {preset.label}
+              </Button>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={() => addProfileField()}>
+              <Plus className="mr-1 h-3 w-3" />
+              Custom field
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-4 rounded-md border border-border p-4">
+          <div>
+            <h3 className="text-sm font-semibold">Consent</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Checkbox copy is shown on the public survey. Leave the text blank to use the brand
+              default.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={settings.participationConsentEnabled}
+              onCheckedChange={(value) => updateSetting("participationConsentEnabled", value)}
+            />
+            <Label>Require participation agreement</Label>
+          </div>
+          {settings.participationConsentEnabled && (
+            <div>
+              <Label>Participation checkbox copy</Label>
+              <Textarea
+                value={settings.participationConsentText}
+                onChange={(e) => updateSetting("participationConsentText", e.target.value)}
+                className="mt-1"
+                placeholder="I agree to participate in this survey."
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={settings.marketingConsentEnabled}
+              onCheckedChange={(value) => updateSetting("marketingConsentEnabled", value)}
+            />
+            <Label>Show marketing opt-in</Label>
+          </div>
+          {settings.marketingConsentEnabled && (
+            <>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={settings.marketingConsentRequired}
+                  onCheckedChange={(value) => updateSetting("marketingConsentRequired", value)}
+                />
+                <Label>Require marketing opt-in to submit</Label>
+              </div>
+              <div>
+                <Label>Marketing checkbox copy</Label>
+                <Textarea
+                  value={settings.marketingConsentText}
+                  onChange={(e) => updateSetting("marketingConsentText", e.target.value)}
+                  className="mt-1"
+                  placeholder="I agree to receive marketing emails."
+                />
+              </div>
+            </>
+          )}
         </div>
         {survey && (
           <div className="space-y-2 text-sm text-muted-foreground">

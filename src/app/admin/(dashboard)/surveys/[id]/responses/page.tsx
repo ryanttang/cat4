@@ -6,6 +6,7 @@ import {
   getSurveyResponseDetails,
   SURVEY_RESPONSE_LIST_LIMIT,
 } from "@/lib/data";
+import { mergeSurveySettings, getSurveyResponseProfile } from "@/lib/surveys/constants";
 import { formatSurveyAnswerValue } from "@/lib/surveys/results";
 import { Button } from "@/components/ui/button";
 import { adminTableWrapClass } from "@/components/admin/admin-ui";
@@ -23,7 +24,7 @@ export default async function SurveyResponsesPage({ params }: Props) {
     getSurveyQuestions(id),
     getSurveyResponseDetails(id),
   ]);
-
+  const profileFields = mergeSurveySettings(survey.settings).profileFields;
   const showingCapped = responses.length >= SURVEY_RESPONSE_LIST_LIMIT;
 
   return (
@@ -55,6 +56,13 @@ export default async function SurveyResponsesPage({ params }: Props) {
             <tr className="border-b border-border bg-muted/50 text-left">
               <th className="p-4">Submitted</th>
               <th className="p-4">Email</th>
+              {profileFields.map((field) => (
+                <th key={field.id} className="p-4">
+                  {field.label}
+                </th>
+              ))}
+              <th className="p-4">Participated</th>
+              <th className="p-4">Marketing</th>
               {questions.map((question) => (
                 <th key={question.id} className="max-w-[14rem] p-4" title={question.questionText}>
                   <span className="line-clamp-2">{question.questionText}</span>
@@ -70,6 +78,16 @@ export default async function SurveyResponsesPage({ params }: Props) {
               >
                 <td className="whitespace-nowrap p-4">{formatDateTime(response.submittedAt)}</td>
                 <td className="p-4">{response.respondentEmail || "—"}</td>
+                {profileFields.map((field) => {
+                  const profile = getSurveyResponseProfile(response.metadata);
+                  return (
+                    <td key={field.id} className="p-4">
+                      {profile[field.key] || "—"}
+                    </td>
+                  );
+                })}
+                <td className="p-4">{response.metadata?.consentParticipation ? "Yes" : "—"}</td>
+                <td className="p-4">{response.metadata?.consentMarketing ? "Yes" : "—"}</td>
                 {questions.map((question) => (
                   <td key={question.id} className="max-w-[16rem] p-4">
                     <p className="whitespace-pre-wrap break-words">

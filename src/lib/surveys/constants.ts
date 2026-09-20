@@ -1,6 +1,146 @@
-import type { SurveyQuestion, SurveySettings } from "@/lib/db/schema";
+import { brand } from "@/lib/brand";
+import type { SurveyProfileField, SurveyQuestion, SurveySettings } from "@/lib/db/schema";
+import { slugify } from "@/lib/utils";
 
-export type { SurveySettings };
+export type { SurveyProfileField, SurveySettings };
+
+export const SURVEY_PROFILE_FIELD_PRESETS: Array<
+  Pick<SurveyProfileField, "key" | "label" | "type">
+> = [
+  { key: "firstName", label: "First name", type: "text" },
+  { key: "lastName", label: "Last name", type: "text" },
+  { key: "phone", label: "Phone", type: "tel" },
+  { key: "zip", label: "ZIP code", type: "text" },
+];
+
+export function createSurveyProfileField(
+  overrides: Partial<SurveyProfileField> = {}
+): SurveyProfileField {
+  const label = overrides.label?.trim() || "New field";
+  return {
+    id: overrides.id ?? crypto.randomUUID(),
+    key: overrides.key?.trim() || slugify(label) || `field_${Date.now()}`,
+    label,
+    type: overrides.type ?? "text",
+    required: overrides.required ?? false,
+  };
+}
+
+export function mergeSurveySettings(settings?: SurveySettings | null): {
+  allowMultipleVotes: boolean;
+  anonymousOnly: boolean;
+  resultsRefreshSeconds: number | undefined;
+  headline: string;
+  subtext: string;
+  disclaimerText: string;
+  emailLabel: string;
+  participationConsentEnabled: boolean;
+  participationConsentText: string;
+  marketingConsentEnabled: boolean;
+  marketingConsentText: string;
+  marketingConsentRequired: boolean;
+  profileFields: SurveyProfileField[];
+} {
+  return {
+    allowMultipleVotes: settings?.allowMultipleVotes ?? false,
+    anonymousOnly: settings?.anonymousOnly ?? false,
+    resultsRefreshSeconds: settings?.resultsRefreshSeconds,
+    headline: settings?.headline ?? "",
+    subtext: settings?.subtext ?? "",
+    disclaimerText: settings?.disclaimerText ?? "",
+    emailLabel: settings?.emailLabel ?? "",
+    participationConsentEnabled: settings?.participationConsentEnabled ?? false,
+    participationConsentText: settings?.participationConsentText ?? "",
+    marketingConsentEnabled: settings?.marketingConsentEnabled ?? false,
+    marketingConsentText: settings?.marketingConsentText ?? "",
+    marketingConsentRequired: settings?.marketingConsentRequired ?? false,
+    profileFields: (settings?.profileFields ?? []).map((field) =>
+      createSurveyProfileField(field)
+    ),
+  };
+}
+
+export function defaultSurveySettingsForCreate(): SurveySettings {
+  return {
+    ...mergeSurveySettings(null),
+    participationConsentEnabled: true,
+    marketingConsentEnabled: true,
+  };
+}
+
+export function resolveSurveyPublicCopy(survey: {
+  title: string;
+  description?: string | null;
+  settings?: SurveySettings | null;
+}) {
+  const settings = mergeSurveySettings(survey.settings);
+  return {
+    headline: settings.headline.trim() || survey.title,
+    subtext: settings.subtext.trim() || survey.description?.trim() || "",
+    disclaimerText: settings.disclaimerText.trim(),
+    emailLabel: settings.emailLabel.trim() || "Email",
+    participationConsentEnabled: settings.participationConsentEnabled,
+    participationConsentText:
+      settings.participationConsentText.trim() || brand.defaults.surveyParticipationConsent,
+    marketingConsentEnabled: settings.marketingConsentEnabled,
+    marketingConsentText:
+      settings.marketingConsentText.trim() || brand.defaults.marketingConsent,
+    marketingConsentRequired: settings.marketingConsentRequired,
+    profileFields: settings.profileFields,
+  };
+}
+
+export type SurveyIntakeInput = {
+  email?: string;
+  profile?: Record<string, string>;
+  consentParticipation?: boolean;
+  consentMarketing?: boolean;
+};
+
+export function validateSurveyIntake(
+  survey: { emailRequired: boolean; settings?: SurveySettings | null },
+  input: SurveyIntakeInput
+): string | null {
+  const copy = resolveSurveyPublicCopy({
+    title: "",
+    description: null,
+    settings: survey.settings,
+  });
+
+  if (survey.emailRequired && !input.email?.trim()) {
+    return `${copy.emailLabel} is required`;
+  }
+
+  for (const field of copy.profileFields) {
+    if (!field.required) continue;
+    if (!input.profile?.[field.key]?.trim()) {
+      return `${field.label} is required`;
+    }
+  }
+
+  if (copy.participationConsentEnabled && !input.consentParticipation) {
+    return "Please agree to participate before submitting";
+  }
+
+  if (copy.marketingConsentEnabled && copy.marketingConsentRequired && !input.consentMarketing) {
+    return "Please agree to receive marketing emails";
+  }
+
+  return null;
+}
+
+export function getSurveyResponseProfile(
+  metadata: Record<string, unknown> | null | undefined
+): Record<string, string> {
+  const raw = metadata?.profile;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  return Object.fromEntries(
+    Object.entries(raw as Record<string, unknown>).map(([key, value]) => [
+      key,
+      value == null ? "" : String(value),
+    ])
+  );
+}
 
 export const SURVEY_CONTENT_TYPES = [
   { value: "survey", label: "Survey" },

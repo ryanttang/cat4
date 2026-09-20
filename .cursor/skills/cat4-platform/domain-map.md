@@ -65,6 +65,7 @@ Quick map of product domains → schema → routes → primary modules.
 | Helpers | `lib/surveys/` |
 | Public | `/survey/[slug]`, `/poll/[slug]` (+ results) |
 | Admin | `/admin/surveys`, `/admin/surveys/[id]/responses`, `/admin/polls` |
+| Settings JSON | header/subtext/disclaimer, consent copy, extra contact fields |
 | API | `/api/surveys/[id]/results` |
 | UI shared | `components/surveys/*` |
 

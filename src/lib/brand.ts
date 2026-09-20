@@ -30,6 +30,7 @@ export const brand = {
     seedAdminEmail: "admin@cat4.com",
     seedAdminName: "CAT4 Admin",
     marketingConsent: "I agree to receive marketing emails from CAT4. Unsubscribe anytime.",
+    surveyParticipationConsent: "I agree to participate in this survey from CAT4.",
     promotionConsent: "I agree to the official rules and to receive emails from CAT4.",
     rewardCodePrefix: "CAT4-",
     hubTitle: "CAT4",

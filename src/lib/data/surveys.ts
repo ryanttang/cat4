@@ -330,6 +330,7 @@ export type SurveyResponseDetail = {
   respondentEmail: string | null;
   submittedAt: Date;
   answersByQuestionId: Record<string, unknown>;
+  metadata: Record<string, unknown> | null;
 };
 
 export async function getSurveyResponseDetails(
@@ -350,6 +351,7 @@ export async function getSurveyResponseDetails(
             .filter((answer) => answer.responseId === response.id)
             .map((answer) => [answer.questionId, answer.answer])
         ),
+        metadata: response.metadata,
       }));
   }
 
@@ -384,6 +386,7 @@ export async function getSurveyResponseDetails(
     respondentEmail: response.respondentEmail,
     submittedAt: response.submittedAt,
     answersByQuestionId: answersByResponse.get(response.id) ?? {},
+    metadata: response.metadata,
   }));
 }
 
